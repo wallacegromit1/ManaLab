@@ -1,0 +1,18 @@
+{
+  "artifact_content_hash": "a2879fb4a50fe41c32d507e8cc2bee29b3ce6f64d24fc0d5310d074b0507d127",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "mode": "READINESS_DRY_RUN",
+  "paired_keys_verified": [
+    "scenario",
+    "replicate",
+    "trial",
+    "on_play"
+  ],
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "selection_seed": 2026091701,
+  "stage": "04_medium",
+  "status": "PASS",
+  "trial_count_frozen": 8192
+}

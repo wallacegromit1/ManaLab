@@ -1,0 +1,13 @@
+{
+  "artifact_content_hash": "64345debe882d77f8ca8735882d5c9703d96e1aa32ec227c16422df702dcf653",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "mode": "READINESS_DRY_RUN",
+  "protected_c0": true,
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "retention_rule": "Union of C0; each profile's uncertainty set; all profile-Pareto unresolved candidates; and every candidate within two materiality tolerances of any profile leader.",
+  "selected_identity_disclosure": "suppressed_in_dry_run",
+  "stage": "05_select_finalists",
+  "status": "PASS"
+}

@@ -1,0 +1,278 @@
+schema_version: "mana-lab-phase3-run-g-v1"
+
+experiment:
+  id: "strixpatch-affinity-v1.3-phase3-rung-freeze"
+  frozen_at: "2026-09-18"
+  purpose: "Executable Phase 3 design frozen for independent Run H authorization; Run G does not authorize or execute optimization."
+
+phase_control:
+  authorization_status: "PENDING_INDEPENDENT_RUN_H"
+  optimization_execution_allowed: false
+  real_candidate_performance_allowed_in_readiness: false
+  readiness_mode: "SYNTHETIC_DRY_RUN_ONLY"
+
+input:
+  parent_archive:
+    name: "Mana_Lab_Pauper_v1_Run_E.zip"
+    sha256: "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71"
+  deck_spec:
+    path: "configs/decks/Strixpatch_Affinity_v1.3.deck.yaml"
+    sha256: "e0e18170cc3d362ae697726115381dcf3ec6ad3a4140ce46b388269ca0f9303a"
+  deck_size: 60
+  frozen_nonlands: 41
+  exact_land_count: 19
+  target_turn_horizon: 4
+
+candidate_space:
+  expected_count: 296706
+  expected_canonical_set_sha256: "d9bff0652d2d449f761205575b63af0db5205c3354705c82302fa8b649de78e3"
+  protect_c0_every_serious_stage: true
+  protect_minimum_bridge_class: true
+  expected_minimum_bridge_class_count: 56
+  candidate_identity: "SHA-256 of canonical sorted land-name:count pairs; display key retains canonical pairs"
+  c0:
+    Ancient Den: 3
+    Seat of the Synod: 4
+    Vault of Whispers: 4
+    Great Furnace: 4
+    Razortide Bridge: 1
+    Goldmire Bridge: 1
+    Mistvault Bridge: 2
+    Drossforge Bridge: 0
+    Rustvale Bridge: 0
+    Silverbluff Bridge: 0
+
+pipeline:
+  stages:
+    - "01_validate"
+    - "02_enumerate"
+    - "03_screen"
+    - "04_medium"
+    - "05_select_finalists"
+    - "06_fresh_validation"
+    - "07_robustness"
+    - "08_frontier"
+    - "09_report"
+  prerequisite_rule: "Every stage reads the prior immutable manifest, verifies config/code/seed/policy hashes, and aborts on missing or mismatched prerequisites."
+  dry_run_fixture: "Four synthetic candidates exercise protection, low-N retention, uncertain retention, and decisive dominance; no real candidate performance is evaluated."
+
+randomness:
+  selection_seed: 2026091701
+  validation_seed: 2026091702
+  replicate_seeds: [2026091703, 2026091704, 2026091705, 2026091706]
+  seed_derivation: "SHA-256(purpose|scenario|replicate|trial|mulligan_attempt); candidate identity and iteration order excluded"
+  pairing_keys: ["scenario", "replicate", "trial", "on_play"]
+  validation_isolation: "Validation seed and all validation event rows are inaccessible to screening, profile construction, and finalist selection."
+
+trial_plan:
+  screening_trials_per_candidate: 512
+  medium_trials_per_candidate: 8192
+  validation_trials_per_candidate: 32768
+  validation_adaptive_batch: 16384
+  validation_adaptive_cap: 131072
+  replicate_count: 4
+  rationale: "Nonzero preregistered counts; screening is conservative and cannot eliminate on noisy means; confirmatory precision is increased only for unresolved finalists."
+
+scenarios:
+  primary_play_draw:
+    - {id: "on_play", weight: 0.5}
+    - {id: "on_draw", weight: 0.5}
+  primary_mulligan: "baseline_functional_london"
+  alternate_mulligan: "alternate_landcount_london"
+  primary_sequencing: "baseline_hand_demand"
+  alternate_sequencing: "alternate_tempo_untapped"
+  primary_reserve: "reserve_one_reply"
+  alternate_reserve: "tap_out_development"
+  primary_scry: "boulder_scry_baseline"
+  alternate_scry: "boulder_scry_alternate"
+  primary_information: "baseline_information_value"
+  alternate_information: "conservative_information_value"
+  planner_search_depth: 8
+  planner_max_actions_per_main: 12
+  depth_sensitivity: [7, 8, 9]
+
+policies:
+  drift_behavior: "FAIL_FAST"
+  identities:
+    sequencing_baseline: {id: "baseline_hand_demand", content_hash: "aad7cc3f1bc01a9ea312f1d6a4f629858dc2ac7c30e369289015efe67b6abeeb"}
+    sequencing_alternate: {id: "alternate_tempo_untapped", content_hash: "4b5af0dd4635e385937947405e31659a9fdad3dd85bc5cf6c384ca2ccfff4141"}
+    mulligan_baseline: {id: "baseline_functional_london", content_hash: "f8ff67ad75b9f201220c9a13b6ca1be78719c192ee7777af97dac98dfa345753"}
+    mulligan_alternate: {id: "alternate_landcount_london", content_hash: "37e5c0e7d7272540d63aeea88fafa89a200e970a08c6a1c08fc477781785f1f0"}
+    scry_baseline: {id: "boulder_scry_baseline", content_hash: "b2404ef7ffb3714d10765be0ce6f906815af685019cf010a8a5233b2e9346725"}
+    scry_alternate: {id: "boulder_scry_alternate", content_hash: "8a8be07ebc0b4a95b2e985790b4fb6be5c3b6bd0c6fe95be52c29cebf3116d0b"}
+    reserve_baseline: {id: "reserve_one_reply", content_hash: "b3c3f3c88de5f0cb9f7c1ef98b572dcb3e3d1d2ea10444974933605298cff936"}
+    reserve_alternate: {id: "tap_out_development", content_hash: "29a606801f7746c215f64a9d758047bd0b8b9d5f24750cce0551431e54de33d2"}
+    information_baseline: {id: "baseline_information_value", content_hash: "5a4ce37fcee67df55ed42f9595aca651bd5f17318f88d39ed44edf3299761058"}
+    information_alternate: {id: "conservative_information_value", content_hash: "e8c7530a13d114aeb90fa835d36df7cb968224d38e11c4daaf0161b5f4c8e3c3"}
+
+metrics:
+  raw_events_first: true
+  primary:
+    - "spell_level_on_time_castability"
+    - "usable_untapped_mana_by_turn"
+    - "joint_UB_access_by_turn"
+    - "opponent_turn_interaction_availability"
+    - "full_effect_metalcraft_interaction_availability"
+    - "double_spell_success"
+    - "spell_plus_held_interaction_success"
+    - "critical_sequence_success"
+  secondary:
+    - "opening_land_distribution"
+    - "mulligan_count_and_kept_hand_size"
+    - "W_U_B_R_access_by_turn"
+    - "artifact_count_by_window"
+    - "metalcraft_rate_by_window"
+    - "affinity_reduction_by_spell_and_turn"
+    - "boulder_deploy_activation_rescue_dependency"
+    - "cryogen_enter_leave_draw_events"
+    - "glint_hawk_functional_execution_and_return_cost"
+    - "bargain_functional_execution_and_sacrifice_resource_loss"
+    - "stranded_spell_reason"
+    - "realized_etb_tapped_block"
+    - "unused_mana"
+    - "unavailable_tapped_mana"
+    - "nihil_optional_black_draw_option"
+    - "scry_decision_outcome"
+    - "land_return_events"
+    - "land_sacrifice_events"
+  target_dependent_counterfactual_only:
+    - "blood_token_activation_option"
+    - "munitions_activation_option"
+    - "cryogen_stun_activation_option"
+
+decision_profiles:
+  balanced:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied if every component is within its materiality tolerance; retain both when uncertainty overlaps"
+    overlap_rationale: "Castability, retained interaction, and double-spelling are distinct execution outcomes; raw color, ETB, and artifact diagnostics are excluded to avoid nested penalties."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["spell_level_on_time_castability", "opponent_turn_interaction_availability"]
+      rationale: "Removes multi-action overlap while preserving proactive and reactive function."
+    metric_vector:
+      - {metric: "spell_level_on_time_castability", direction: "higher", aggregation: "desired-window-weighted mean across spells and turns 1-4", turns: [1, 2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "opponent_turn_interaction_availability", direction: "higher", aggregation: "mean over held interaction opportunities at turns 2-4", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "double_spell_success", direction: "higher", aggregation: "mean of functional double-spell success at turns 3-4", turns: [3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+  tempo_sensitive:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied within component materiality tolerances; uncertainty retains both"
+    overlap_rationale: "Usable mana is primary; ETB blockage is secondary and removed in the de-correlated variant; double-spell is a realized endpoint."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["usable_untapped_mana_by_turn", "double_spell_success"]
+      rationale: "Drops the ETB diagnostic nested in usable mana."
+    metric_vector:
+      - {metric: "usable_untapped_mana_by_turn", direction: "higher", aggregation: "turn-weighted mean with weights T1=.35 T2=.30 T3=.20 T4=.15", turns: [1, 2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.01, materiality_tolerance: 0.025, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "realized_etb_tapped_block", direction: "lower", aggregation: "rate per land play through turn 4", turns: [1, 2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "double_spell_success", direction: "higher", aggregation: "mean at turns 3-4", turns: [3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+  color_consistency:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied within component materiality tolerances; uncertainty retains both"
+    overlap_rationale: "Functional castability is primary; joint UB is a diagnostic secondary stress dimension and is omitted in the de-correlated variant."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["spell_level_on_time_castability"]
+      rationale: "Avoids counting raw color access separately from spell execution."
+    metric_vector:
+      - {metric: "spell_level_on_time_castability", direction: "higher", aggregation: "desired-window-weighted mean for colored spells", turns: [1, 2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "joint_UB_access_by_turn", direction: "higher", aggregation: "weighted rate T2=.6 T3=.3 T4=.1", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+  interaction_sensitive:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied within component materiality tolerances; uncertainty retains both"
+    overlap_rationale: "Spell-plus-held interaction is primary; general and Metalcraft availability are nested diagnostics removed by de-correlation."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["spell_plus_held_interaction_success"]
+      rationale: "Uses the realized combined endpoint only."
+    metric_vector:
+      - {metric: "spell_plus_held_interaction_success", direction: "higher", aggregation: "mean at turns 2-4 over own-main starts", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "opponent_turn_interaction_availability", direction: "higher", aggregation: "mean over held interaction opportunities", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "full_effect_metalcraft_interaction_availability", direction: "higher", aggregation: "mean over Dispatch/Blast held opportunities", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+  double_spell_sensitive:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied within component materiality tolerances; uncertainty retains both"
+    overlap_rationale: "Double-spell and spell-plus-interaction are different paired-action endpoints; de-correlation retains double-spell only."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["double_spell_success"]
+      rationale: "Single primary multi-action endpoint."
+    metric_vector:
+      - {metric: "double_spell_success", direction: "higher", aggregation: "mean at turns 3-4 with T3=.4 T4=.6", turns: [3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "spell_plus_held_interaction_success", direction: "higher", aggregation: "mean at turns 3-4", turns: [3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+  affinity_value_engine:
+    comparison: "lexicographic metric vector; no scalar master score"
+    tie_behavior: "practically tied within component materiality tolerances; uncertainty retains both"
+    overlap_rationale: "Functional affinity spell castability is primary; artifact and Metalcraft rates remain descriptive and are excluded from this profile."
+    leave_one_out: "evaluate one preregistered variant per omitted component"
+    decorrelated_variant:
+      metrics: ["spell_level_on_time_castability", "critical_sequence_success"]
+      rationale: "Both retained endpoints are functional rather than raw artifact-count proxies."
+    metric_vector:
+      - {metric: "spell_level_on_time_castability", direction: "higher", aggregation: "desired-window-weighted mean for Thoughtcast/Myr Enforcer/Refurbished Familiar/Utrom Monitor", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+      - {metric: "critical_sequence_success", direction: "higher", aggregation: "mean of preregistered affinity and Cryogen/Hawk sequence predicates", turns: [2, 3, 4], scenarios: ["weighted_primary"], normalization: "none", no_worse_tolerance: 0.0025, materiality_tolerance: 0.005, missing_data: "error", uncertainty: "paired confidence interval"}
+
+screening:
+  confidence_level: 0.99
+  multiple_comparison_control: "Holm family-wise alpha 0.01 within each profile and stage"
+  elimination_rule: "A non-protected candidate may be eliminated only when at least 512 paired trials exist and one retained comparator is statistically no-worse within tolerance on every profile component and materially better on at least one; point estimates alone never eliminate."
+  near_boundary_rule: "Retain if any component confidence interval crosses the no-worse or materiality boundary or if profile results conflict."
+  false_elimination_safety: "C0 and every 3-Bridge candidate are always retained; all uncertain comparisons are retained; screening eliminations are auditable and reversible from raw rows."
+
+finalist_retention:
+  rule: "Union of C0; each profile's uncertainty set; all profile-Pareto unresolved candidates; and every candidate within two materiality tolerances of any profile leader."
+  minimum_finalists: 5
+  maximum_soft_target: 64
+  target_is_not_a_cap: true
+
+validation:
+  confidence_level: 0.95
+  paired_common_random_numbers: true
+  fresh_seed_required: true
+  adaptive_rule: "Add 16384-trial validation batches up to 131072 only for comparisons whose paired interval intersects a no-worse or materiality boundary."
+  multiple_comparison_handling: "Holm family-wise alpha 0.05 across confirmatory pairwise claims within each profile; exploratory intervals labeled separately."
+
+dominance:
+  exact_dimensions: "Apply direction and practical tolerances directly."
+  stochastic_dimensions: "Use paired confidence bounds; no-worse requires the oriented lower bound >= -no_worse_tolerance; material improvement requires the oriented lower bound > materiality_tolerance."
+  missing_data: "Comparison is unresolved; never dominate."
+  conflict: "Any materially worse dimension blocks dominance."
+  frontier_rule: "Remove a candidate only when another is no-worse on all eligible dimensions and materially better on at least one under the uncertainty rule."
+
+robustness_scenarios:
+  - {id: "baseline_primary", mulligan: "baseline_functional_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "weighted_50_50"}
+  - {id: "alternate_mulligan", mulligan: "alternate_landcount_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "weighted_50_50"}
+  - {id: "tempo_tapout", mulligan: "baseline_functional_london", sequencing: "alternate_tempo_untapped", reserve: "tap_out_development", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "weighted_50_50"}
+  - {id: "alternate_scry_information", mulligan: "baseline_functional_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_alternate", information: "conservative_information_value", play_draw: "weighted_50_50"}
+  - {id: "all_play", mulligan: "baseline_functional_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "all_play"}
+  - {id: "all_draw", mulligan: "baseline_functional_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "all_draw"}
+  - {id: "target_dependent_options_raw_only", mulligan: "baseline_functional_london", sequencing: "baseline_hand_demand", reserve: "reserve_one_reply", scry: "boulder_scry_baseline", information: "baseline_information_value", play_draw: "weighted_50_50"}
+
+mechanics:
+  registry_path: "RUN_G_MECHANICS_COVERAGE.csv"
+  registry_sha256: "7a732b36e2530783e9d0bd685a0904f93c2b267810c161fa11bd3e534a9cc6f5"
+  blocking_rule: "Any ranking-relevant row not IMPLEMENTED + TESTED blocks readiness and execution."
+
+outputs:
+  candidate_metrics: "outputs/phase3/candidate_metrics.parquet_or_csv"
+  spell_metrics: "outputs/phase3/spell_turn_metrics.parquet_or_csv"
+  turn_metrics: "outputs/phase3/turn_metrics.parquet_or_csv"
+  paired_differences: "outputs/phase3/paired_differences.parquet_or_csv"
+  screening_decisions: "outputs/phase3/screening_decisions.jsonl"
+  validation_results: "outputs/phase3/validation_results.jsonl"
+  robustness_matrix: "outputs/phase3/robustness_matrix.csv"
+  pareto_frontier: "outputs/phase3/pareto_frontier.csv"
+  stage_manifests: "outputs/phase3/manifests"
+  final_report: "outputs/phase3/FINAL_PHASE3_REPORT.md"
+  required_row_provenance: ["candidate_id", "config_hash", "policy_hash", "seed_partition", "scenario_id", "metric", "value"]
+
+stop_conditions:
+  - "Parent archive, deck, mechanic registry, config, code tree, or policy hash mismatch."
+  - "Candidate count is not 296706 or C0 does not occur exactly once."
+  - "Any requested policy is missing or screening and validation policy identities differ outside a labeled robustness scenario."
+  - "Selection and validation seed partitions overlap or a pairing key is missing/duplicated."
+  - "Any ranking-relevant mechanic is not IMPLEMENTED + TESTED."
+  - "Raw-event aggregation detects missing required events, duplicate opportunity IDs, or schema drift."
+  - "A stage prerequisite or immutable manifest is missing or mismatched."
+  - "Dry-run/readiness mode is asked to evaluate real candidate performance."
+  - "Planner depth structural audit fails a preregistered class."
+

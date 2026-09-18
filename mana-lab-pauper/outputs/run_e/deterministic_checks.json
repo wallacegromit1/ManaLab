@@ -1,0 +1,52 @@
+{
+  "acceptance": {
+    "c0_facts_match": true,
+    "land_distribution_matches": true,
+    "source_presence_matches": true
+  },
+  "c0": {
+    "bridges": 4,
+    "direct_sources": {
+      "B": 7,
+      "R": 4,
+      "U": 7,
+      "W": 5
+    },
+    "lands": 19,
+    "untapped": 15
+  },
+  "deck_size": 60,
+  "giants_boulder": 4,
+  "historical_c1_regression_only": {
+    "bridges": 3,
+    "direct_sources": {
+      "B": 7,
+      "R": 4,
+      "U": 7,
+      "W": 4
+    },
+    "lands": 19,
+    "untapped": 16
+  },
+  "lands": 19,
+  "nonlands": 41,
+  "raw_seven_19_land_distribution": {
+    "0": 0.0582121625371187,
+    "1": 0.22120621764105108,
+    "2": 0.3318093264615766,
+    "3": 0.2540882229660722,
+    "4": 0.10698451493308302,
+    "5": 0.02468873421532685,
+    "6": 0.002880352325121466,
+    "7": 0.00013046892065010125
+  },
+  "raw_seven_direct_source_presence": {
+    "B7": 0.6008795492323131,
+    "R4": 0.3994996257446656,
+    "U7": 0.6008795492323131,
+    "W5": 0.4745621725265824,
+    "joint_U7_B7_overlap2": 0.3924057911753627
+  },
+  "smoke_tolerance_rule": "absolute error <= max(0.005, 4 * binomial standard error using exact p and n=20000)",
+  "t2_myr_enforcer_counterexample": null
+}

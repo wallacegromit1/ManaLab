@@ -1,0 +1,100 @@
+{
+  "a": {
+    "command": [
+      "/usr/bin/python",
+      "-m",
+      "mana_lab.phase3_readiness",
+      "--root",
+      ".",
+      "--config",
+      "RUN_G_PHASE3_FROZEN_CONFIG.yaml",
+      "--parent-zip",
+      "/home/monkeyd/Documents/Mana_Lab_Pauper_v1_Run_E.zip"
+    ],
+    "dry_files": {
+      "01_validate.json": "47563ca21155d83c296fee1237f42bfe6baf1e967ab47e26dd95732f8196f25e",
+      "02_enumerate.json": "feae4104d67630e980bd0f1881d74355066bdf575ebb0f1b13a3aa1a085653a0",
+      "03_screen.json": "0008c5a3d86019f5e03615ba1828e8b89b4136a9e116f0112ab9c3b8febf841e",
+      "04_medium.json": "80fadc54285a926bb3115a37176c41248e550d81eb221a2bfa8459326e35c07a",
+      "05_select_finalists.json": "be1a5d3a7a0368f9f921a57435785ec24eee5d3d3bb4de242e67f52b70784118",
+      "06_fresh_validation.json": "d8accc6135e60bf976f4fe3817a1c2db45e51beb80ebb1410027182dcfd24a6f",
+      "07_robustness.json": "c95d55b2946743f9d89644ce1d01b15ac54b593238a20370a7a5cc3bee0d14e9",
+      "08_frontier.json": "49968dffac29ded9daab0fd8cface66e611b0cec047ab267a58c83ddb01a7e19",
+      "09_report.json": "c6d8837e5a7488b7cec5e322261e78c665279c84dced38c796fdf4f220d57f94",
+      "dry_run_manifest.json": "a163ae72d8fb9a1fe2bb26c16760ffcdf33523e96d2c3f54cd588953a1b15b6b"
+    },
+    "exit_code": 0,
+    "gate_status": "PASS",
+    "immutable_files_unchanged": true,
+    "tests": {
+      "pass": true,
+      "returncode": 0,
+      "tests": 205
+    }
+  },
+  "b": {
+    "command": [
+      "/usr/bin/python",
+      "-m",
+      "mana_lab.phase3_readiness",
+      "--root",
+      ".",
+      "--config",
+      "RUN_G_PHASE3_FROZEN_CONFIG.yaml",
+      "--parent-zip",
+      "/home/monkeyd/Documents/Mana_Lab_Pauper_v1_Run_E.zip"
+    ],
+    "dry_files": {
+      "01_validate.json": "47563ca21155d83c296fee1237f42bfe6baf1e967ab47e26dd95732f8196f25e",
+      "02_enumerate.json": "feae4104d67630e980bd0f1881d74355066bdf575ebb0f1b13a3aa1a085653a0",
+      "03_screen.json": "0008c5a3d86019f5e03615ba1828e8b89b4136a9e116f0112ab9c3b8febf841e",
+      "04_medium.json": "80fadc54285a926bb3115a37176c41248e550d81eb221a2bfa8459326e35c07a",
+      "05_select_finalists.json": "be1a5d3a7a0368f9f921a57435785ec24eee5d3d3bb4de242e67f52b70784118",
+      "06_fresh_validation.json": "d8accc6135e60bf976f4fe3817a1c2db45e51beb80ebb1410027182dcfd24a6f",
+      "07_robustness.json": "c95d55b2946743f9d89644ce1d01b15ac54b593238a20370a7a5cc3bee0d14e9",
+      "08_frontier.json": "49968dffac29ded9daab0fd8cface66e611b0cec047ab267a58c83ddb01a7e19",
+      "09_report.json": "c6d8837e5a7488b7cec5e322261e78c665279c84dced38c796fdf4f220d57f94",
+      "dry_run_manifest.json": "a163ae72d8fb9a1fe2bb26c16760ffcdf33523e96d2c3f54cd588953a1b15b6b"
+    },
+    "exit_code": 0,
+    "gate_status": "PASS",
+    "immutable_files_unchanged": true,
+    "tests": {
+      "pass": true,
+      "returncode": 0,
+      "tests": 205
+    }
+  },
+  "cross_extraction_dry_content_equal": true,
+  "parent": {
+    "command": [
+      "/usr/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-v"
+    ],
+    "exit_code": 0,
+    "immutable_files_unchanged": true,
+    "test_counts": [
+      "179"
+    ]
+  },
+  "required_deliverables": [
+    "mana-lab-pauper/RUN_G_ACCEPTANCE_MATRIX.csv",
+    "mana-lab-pauper/RUN_G_CHANGELOG.md",
+    "mana-lab-pauper/RUN_G_DECISION_PROFILE_SPEC.md",
+    "mana-lab-pauper/RUN_G_MECHANICS_COVERAGE.csv",
+    "mana-lab-pauper/RUN_G_NO_OPTIMIZATION_ATTESTATION.md",
+    "mana-lab-pauper/RUN_G_PHASE3_FROZEN_CONFIG.yaml",
+    "mana-lab-pauper/RUN_G_PHASE3_PIPELINE_SPEC.md",
+    "mana-lab-pauper/RUN_G_PHASE3_READINESS_REPORT.md",
+    "mana-lab-pauper/RUN_G_PROVENANCE.md",
+    "mana-lab-pauper/RUN_G_REPRODUCIBILITY.md"
+  ],
+  "run_e_sha256": "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71",
+  "run_g_sha256": "ca7f2ed96cfc0a19041304af4d29bdbb4bf9c9b3908d10f35ffadb0599813e9d",
+  "zip_corruption": null
+}

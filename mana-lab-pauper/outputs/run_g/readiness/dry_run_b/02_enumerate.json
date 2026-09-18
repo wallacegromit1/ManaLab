@@ -1,0 +1,13 @@
+{
+  "artifact_content_hash": "2d1a620aec85551c227b80d8a29e963eaf596389bb4f164d0838b3e2ff23a9b0",
+  "c0_occurrences": 1,
+  "candidate_count": 296706,
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "deterministic_only": true,
+  "minimum_bridge_class_count": 56,
+  "mode": "READINESS_DRY_RUN",
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "stage": "02_enumerate",
+  "status": "PASS"
+}

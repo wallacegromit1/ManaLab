@@ -1,0 +1,18 @@
+{
+  "independent_partition": true,
+  "replicate_seeds": [
+    2026091703,
+    2026091704,
+    2026091705,
+    2026091706
+  ],
+  "selection_seed": 2026091701,
+  "stable_derivation": "SHA-256(scenario|trial|mulligan_attempt); candidate excluded",
+  "trial_pairing_keys": [
+    "scenario",
+    "replicate",
+    "trial",
+    "on_play"
+  ],
+  "validation_seed": 2026091702
+}

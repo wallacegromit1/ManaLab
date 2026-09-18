@@ -1,0 +1,115 @@
+{
+  "divergence_examples": [],
+  "profiles": {
+    "baseline_information_value": {
+      "draw_1": 100,
+      "draw_2": 190,
+      "scry_2": 80
+    },
+    "conservative_information_value": {
+      "draw_1": 35,
+      "draw_2": 60,
+      "scry_2": 20
+    }
+  },
+  "root_choice_divergence_count": 0,
+  "rows": [
+    {
+      "baseline_root": "('land', 'Great Furnace')",
+      "conservative_root": "('land', 'Great Furnace')",
+      "divergent": false,
+      "state": "ordinary_trial_0_turn_1"
+    },
+    {
+      "baseline_root": "('land', 'Seat of the Synod')",
+      "conservative_root": "('land', 'Seat of the Synod')",
+      "divergent": false,
+      "state": "ordinary_trial_0_turn_2"
+    },
+    {
+      "baseline_root": "('land', 'Mistvault Bridge')",
+      "conservative_root": "('land', 'Mistvault Bridge')",
+      "divergent": false,
+      "state": "ordinary_trial_0_turn_3"
+    },
+    {
+      "baseline_root": "('spell', 'Blood Fountain', ((('land-50', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_root": "('spell', 'Blood Fountain', ((('land-50', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "divergent": false,
+      "state": "ordinary_trial_0_turn_4"
+    },
+    {
+      "baseline_root": "('land', 'Seat of the Synod')",
+      "conservative_root": "('land', 'Seat of the Synod')",
+      "divergent": false,
+      "state": "ordinary_trial_1_turn_1"
+    },
+    {
+      "baseline_root": "('land', 'Vault of Whispers')",
+      "conservative_root": "('land', 'Vault of Whispers')",
+      "divergent": false,
+      "state": "ordinary_trial_1_turn_2"
+    },
+    {
+      "baseline_root": "('land', 'Ancient Den')",
+      "conservative_root": "('land', 'Ancient Den')",
+      "divergent": false,
+      "state": "ordinary_trial_1_turn_3"
+    },
+    {
+      "baseline_root": "('land', 'Great Furnace')",
+      "conservative_root": "('land', 'Great Furnace')",
+      "divergent": false,
+      "state": "ordinary_trial_1_turn_4"
+    },
+    {
+      "baseline_root": "('land', 'Great Furnace')",
+      "conservative_root": "('land', 'Great Furnace')",
+      "divergent": false,
+      "state": "ordinary_trial_2_turn_1"
+    },
+    {
+      "baseline_root": "('land', 'Ancient Den')",
+      "conservative_root": "('land', 'Ancient Den')",
+      "divergent": false,
+      "state": "ordinary_trial_2_turn_2"
+    },
+    {
+      "baseline_root": "('land', 'Vault of Whispers')",
+      "conservative_root": "('land', 'Vault of Whispers')",
+      "divergent": false,
+      "state": "ordinary_trial_2_turn_3"
+    },
+    {
+      "baseline_root": "('spell', 'Blood Fountain', ((('land-59', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_root": "('spell', 'Blood Fountain', ((('land-59', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "divergent": false,
+      "state": "ordinary_trial_2_turn_4"
+    },
+    {
+      "baseline_root": "('land', 'Mistvault Bridge')",
+      "conservative_root": "('land', 'Mistvault Bridge')",
+      "divergent": false,
+      "state": "target_bridge_future_color"
+    },
+    {
+      "baseline_root": "('land', 'Ancient Den')",
+      "conservative_root": "('land', 'Ancient Den')",
+      "divergent": false,
+      "state": "target_hawk_long_chain"
+    },
+    {
+      "baseline_root": "('spell', 'Baleful Strix', ((('target-land-0', 'U', ''), ('target-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_root": "('spell', 'Baleful Strix', ((('target-land-0', 'U', ''), ('target-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "divergent": false,
+      "state": "target_information_continuation"
+    },
+    {
+      "baseline_root": "('spell', \"Reckoner's Bargain\", ((('target-land-0', 'B', ''), ('target-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Nihil Spellbomb', False, False, (), False, ()))",
+      "conservative_root": "('spell', \"Reckoner's Bargain\", ((('target-land-0', 'B', ''), ('target-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Nihil Spellbomb', False, False, (), False, ()))",
+      "divergent": false,
+      "state": "target_bargain_trigger"
+    }
+  ],
+  "states_tested": 16
+}

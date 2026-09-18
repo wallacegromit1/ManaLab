@@ -1,0 +1,20 @@
+{
+  "artifact_content_hash": "b37a1c5bf0cfc4d7399b2cbd9e1b48cb5f970233f7520b1c993b7ec6d599acc6",
+  "c0_retained": true,
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "decisions_exercised": [
+    "ELIMINATE_STATISTICALLY_AND_MATERIALLY_DOMINATED",
+    "RETAIN_INSUFFICIENT_EVIDENCE",
+    "RETAIN_PROTECTED",
+    "RETAIN_UNRESOLVED_OR_NONDOMINATED"
+  ],
+  "fixture_scope": "synthetic_noncompetitive",
+  "low_n_retained": true,
+  "mode": "READINESS_DRY_RUN",
+  "multiplicity_rule": "Holm family-wise alpha 0.01 within each profile and stage",
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "stage": "03_screen",
+  "status": "PASS",
+  "uncertain_retained": true
+}

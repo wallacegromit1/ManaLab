@@ -1,0 +1,14 @@
+{
+  "candidate_iteration_orders": [
+    [
+      "C0",
+      "HISTORICAL_C1_REGRESSION"
+    ],
+    [
+      "HISTORICAL_C1_REGRESSION",
+      "C0"
+    ]
+  ],
+  "interpretation": "machinery validation only; not candidate performance evidence",
+  "normalized_raw_events_equal": true
+}

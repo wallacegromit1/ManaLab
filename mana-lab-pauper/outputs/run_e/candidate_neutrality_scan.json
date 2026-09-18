@@ -1,0 +1,13 @@
+{
+  "files_scanned": [
+    "choose_land",
+    "choose_action",
+    "src/mana_lab/simulator.py",
+    "src/mana_lab/payment.py",
+    "src/mana_lab/effects.py",
+    "src/mana_lab/state.py",
+    "src/mana_lab/mulligan.py"
+  ],
+  "forbidden_hits": 0,
+  "hits": []
+}

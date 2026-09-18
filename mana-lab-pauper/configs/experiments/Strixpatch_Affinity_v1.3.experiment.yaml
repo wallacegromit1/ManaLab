@@ -1,0 +1,182 @@
+schema_version: "pauper-v1"
+
+experiment:
+  name: "Strixpatch Affinity v1.3 — Run C Remediation/Revalidation"
+  deck_spec: "Strixpatch_Affinity_v1.3.deck.yaml"
+
+phase_control:
+  phase: "RUN_C_REMEDIATION_VALIDATE_ONLY"
+  optimization_execution_allowed: false
+  exhaustive_candidate_simulation_allowed: false
+  finalist_selection_allowed: false
+  optimality_label_allowed: false
+  stop_after_acceptance_tests: true
+
+randomness:
+  selection_seed: 2026091701
+  validation_seed: 2026091702
+  replicate_seeds: [2026091703, 2026091704, 2026091705, 2026091706]
+
+search:
+  enumerate_full_space: true
+  protect_current_base: true
+  protected_candidate_rules:
+    - "C0 must always parse and remain available."
+    - "Historical C1 may be retained as a regression fixture only: 4 Ancient Den / 4 Seat / 4 Vault / 4 Furnace / 3 Mistvault."
+    - "All 56 minimum-Bridge candidates are a protected structural class for later search design, not a Run-A performance shortlist."
+  screening:
+    enabled: false
+    trials_per_candidate: 0
+    elimination_rule: "NONE_IN_RUN_A"
+  medium_trials: 0
+  finalist_count_target: 0
+  validation_trials: 0
+
+run_a_smoke_validation:
+  enabled: true
+  candidates: ["C0", "HISTORICAL_C1_REGRESSION"]
+  trials_per_scenario: 20000
+  purpose: "mechanics/policy/exact-check agreement only; never rank or select"
+  max_wall_clock_intent: "small validation only"
+
+run_c_production_validation:
+  enabled: true
+  candidates: ["C0", "HISTORICAL_C1_REGRESSION"]
+  trials_per_scenario: 2
+  purpose: "production-policy machinery and reproducibility validation only; never rank or select"
+  full_action_policy_every_trial: true
+  play_draw: ["mixed"]
+  mulligans: ["baseline_functional_london", "alternate_landcount_london"]
+  sequencing: ["baseline_hand_demand", "alternate_tempo_untapped"]
+
+run_c_engine_smoke:
+  enabled: true
+  c0_raw_opening_trials: 20000
+  purpose: "cheap shuffle/deal and exact-probability agreement; separate from production policy"
+
+scenarios:
+  play_draw:
+    - all_play
+    - all_draw
+    - mixed
+  mulligans:
+    - baseline_functional_london
+    - alternate_landcount_london
+  sequencing:
+    - baseline_hand_demand
+    - alternate_tempo_untapped
+  mechanic_sensitivities:
+    - "boulder_scry_baseline_vs_alternate"
+    - "opponent_reserve_one_reply_vs_tap_out"
+    - "cryogen_leave_draw_on_vs_guardrail_off_expected_to_fail"
+    - "blood_token_full_state_vs_artifact_count_only_diagnostic"
+
+metrics:
+  store_event_level: true
+  primary:
+    - opening_land_distribution
+    - mulligan_count_and_kept_hand_size
+    - usable_untapped_mana_by_turn
+    - W_U_B_R_access_by_turn
+    - joint_UB_access_by_turn
+    - spell_level_on_time_castability
+    - opponent_turn_interaction_availability
+    - full_effect_metalcraft_interaction_availability
+    - double_spell_success
+    - spell_plus_held_interaction_success
+    - artifact_count_by_window
+    - metalcraft_rate_by_window
+    - affinity_reduction_by_spell_and_turn
+    - boulder_deploy_activation_rescue_dependency
+    - cryogen_enter_leave_draw_events
+    - glint_hawk_functional_execution_and_return_cost
+    - bargain_functional_execution_and_sacrifice_resource_loss
+    - critical_sequence_success
+  secondary:
+    - stranded_spell_reason
+    - realized_etb_tapped_block
+    - unused_mana
+    - unavailable_tapped_mana
+    - blood_token_activation_option
+    - nihil_optional_black_draw_option
+    - munitions_activation_option
+    - cryogen_stun_activation_option
+    - scry_decision_outcome
+    - land_return_events
+    - land_sacrifice_events
+
+metric_role_contract:
+  decision_profile_eligible:
+    - spell_level_on_time_castability
+    - opponent_turn_interaction_availability
+    - full_effect_metalcraft_interaction_availability
+    - double_spell_success
+    - spell_plus_held_interaction_success
+    - joint_UB_access_by_turn
+    - usable_untapped_mana_by_turn
+    - critical_sequence_success
+  descriptive_default_only:
+    - realized_etb_tapped_block
+    - unused_mana
+    - unavailable_tapped_mana
+    - boulder_rescue_dependency_diagnostics
+    - artifact_count_by_window
+    - affinity_reduction_by_spell_and_turn
+    - metalcraft_rate_by_window
+  overlap_warnings:
+    - "Do not add ETB-block + unavailable mana + missed-spell penalties without de-correlation; they often describe one failure."
+    - "Do not add raw color access and spell castability as independent penalties without an explicit unique-information argument."
+    - "Boulder rescue/dependency is nested in castability; diagnostic by default."
+    - "Artifact count, affinity reduction, and Metalcraft are strongly correlated; raw diagnostics first."
+    - "Mulligan/functional-hand metrics correlate with early castability."
+
+critical_sequences:
+  - id: "T2_STRIX_UB"
+    event: "Baleful Strix legally cast by own T2 main with distinct U+B payment"
+  - id: "T2_CRYOGEN"
+    event: "Cryogen Relic legally cast by own T2 main and ETB draw resolves"
+  - id: "T2_THOUGHTCAST"
+    event: "Thoughtcast legally cast by own T2 main under actual artifact count and U floor"
+  - id: "T2_FAMILIAR"
+    event: "Refurbished Familiar legally cast by own T2 main under actual artifact count and B floor"
+  - id: "T2_MONITOR"
+    event: "Utrom Monitor legally cast by own T2 main under actual artifact count and U floor"
+  - id: "T3_CRYOGEN_HAWK_LOOP"
+    event: "By end of own T3, Cryogen entered, Hawk legally resolved returning Cryogen, and both Cryogen draw triggers resolved in correct order"
+  - id: "T3_DRAW_PLUS_INTERACTION"
+    event: "A draw/development spell resolves on own T3 while leaving a legal opponent-turn Blast/Dispatch/Bargain option"
+  - id: "T3_AFFINITY_PLUS_INTERACTION"
+    event: "An affinity payoff resolves on own T3 while retaining one legal opponent-turn interaction option"
+  - id: "T4_DOUBLE_SPELL"
+    event: "At least two meaningful nonland spells legally resolve on own T4 under actual payment/state transitions"
+  - id: "OPP_FULL_DISPATCH"
+    event: "Opponent-turn Dispatch is castable and Metalcraft is active at the modeled resolution state"
+  - id: "OPP_FULL_BLAST"
+    event: "Opponent-turn Blast is castable and Metalcraft is active at the modeled resolution state"
+
+statistics:
+  paired_comparisons: true
+  confidence_level: 0.95
+  fresh_validation_after_selection: true
+  run_a_note: "No selection occurs in Run A; paired smoke fixtures are for mechanics QA only."
+
+outputs:
+  candidate_table: true
+  pareto_frontier: false
+  robustness_matrix: false
+  spell_castability: true
+  turn_color_access: true
+  methodology_report: true
+
+run_a_required_outputs:
+  - repository_tree.txt
+  - environment.txt
+  - config_hashes.txt
+  - candidate_count_check.json
+  - deterministic_checks.json
+  - unit_test_report.txt
+  - no_lookahead_test_report.txt
+  - smoke_validation_report.md
+  - coverage_matrix.md
+  - reproduction_commands.md
+  - run_a_stop_certificate.md

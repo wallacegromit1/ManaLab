@@ -1,0 +1,486 @@
+{
+  "W_U_B_R_access_by_turn": {
+    "aggregation_grain": "trial-turn-color",
+    "correlated_family": "color_and_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "primary_pre_spend snapshot",
+    "direction": "higher",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "color in direct_colors or available_filtered_colors",
+    "opportunity_id": "trial_id+turn+color",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "start_own_main"
+  },
+  "affinity_reduction_by_spell_and_turn": {
+    "aggregation_grain": "cast",
+    "correlated_family": "artifact_affinity_metalcraft",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "affinity spell cast",
+    "direction": "higher/contextual",
+    "event_source": [
+      "spell_cast"
+    ],
+    "missing_data": "no cast is no execution opportunity",
+    "numerator": "affinity_reduction",
+    "opportunity_id": "trial_id+spell uid+event_id",
+    "snapshot_role": "post-payment",
+    "status": "phase3",
+    "timing": "payment"
+  },
+  "artifact_count_by_window": {
+    "aggregation_grain": "trial-turn-window",
+    "correlated_family": "artifact_affinity_metalcraft",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "named primary snapshot",
+    "direction": "descriptive",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "artifact_count",
+    "opportunity_id": "trial_id+turn+event_role",
+    "snapshot_role": "declared by event_role",
+    "status": "phase3",
+    "timing": "start or end named window"
+  },
+  "bargain_functional_execution_and_sacrifice_resource_loss": {
+    "aggregation_grain": "Bargain instance",
+    "correlated_family": "bargain_resource",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "Bargain raw cast",
+    "direction": "contextual",
+    "event_source": [
+      "bargain_cast",
+      "spell_resolution"
+    ],
+    "missing_data": "error if cast lacks outcome",
+    "numerator": "functional and explicit land/color/untapped/artifact deltas",
+    "opportunity_id": "trial_id+card uid",
+    "snapshot_role": "pre-draw cost state",
+    "status": "phase3",
+    "timing": "after sacrifice before draws"
+  },
+  "blood_token_activation_option": {
+    "aggregation_grain": "fixture",
+    "correlated_family": "validation_option",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "targeted fixture",
+    "direction": "descriptive",
+    "event_source": [
+      "blood_activation"
+    ],
+    "missing_data": "not produced by normal planner",
+    "numerator": "fixture execution only",
+    "opportunity_id": "fixture id",
+    "snapshot_role": "validation-only",
+    "status": "validation_only",
+    "timing": "fixture"
+  },
+  "boulder_deploy_activation_rescue_dependency": {
+    "aggregation_grain": "event",
+    "correlated_family": "boulder_and_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "deployment or payment event",
+    "direction": "descriptive",
+    "event_source": [
+      "boulder_deployed",
+      "boulder_filter",
+      "boulder_usage"
+    ],
+    "missing_data": "explicit false required when used but native payment exists",
+    "numerator": "separate used/rescue/dependency booleans",
+    "opportunity_id": "trial_id+event_id",
+    "snapshot_role": "payment",
+    "status": "phase3",
+    "timing": "resolution/payment"
+  },
+  "critical_sequence_success": {
+    "aggregation_grain": "trial-sequence",
+    "correlated_family": "critical_sequence",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "trial",
+    "direction": "higher",
+    "event_source": [
+      "spell_resolution",
+      "glint_hawk_return",
+      "opponent_window"
+    ],
+    "missing_data": "false only after complete trace",
+    "numerator": "named sequence predicate",
+    "opportunity_id": "trial_id+sequence id",
+    "snapshot_role": "mixed declared sequence",
+    "status": "phase3",
+    "timing": "through configured turn"
+  },
+  "cryogen_enter_leave_draw_events": {
+    "aggregation_grain": "trigger",
+    "correlated_family": "card_draw_execution",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "Cryogen enter/leave trigger",
+    "direction": "descriptive",
+    "event_source": [
+      "draw",
+      "information_node"
+    ],
+    "missing_data": "zero only when trigger event explicitly absent",
+    "numerator": "draw count by reason",
+    "opportunity_id": "trial_id+event_id",
+    "snapshot_role": "information resolution",
+    "status": "phase3",
+    "timing": "trigger resolution"
+  },
+  "cryogen_stun_activation_option": {
+    "aggregation_grain": "fixture",
+    "correlated_family": "validation_option",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "targeted tapped-creature fixture",
+    "direction": "descriptive",
+    "event_source": [
+      "cryogen_stun_activation"
+    ],
+    "missing_data": "not produced by normal planner",
+    "numerator": "fixture execution only",
+    "opportunity_id": "fixture id",
+    "snapshot_role": "validation-only",
+    "status": "validation_only",
+    "timing": "fixture"
+  },
+  "double_spell_success": {
+    "aggregation_grain": "trial-turn",
+    "correlated_family": "multi_action_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "own-main start",
+    "direction": "higher",
+    "event_source": [
+      "multi_action_window",
+      "policy_action_sequence",
+      "spell_resolution"
+    ],
+    "missing_data": "error",
+    "numerator": "at least two functional resolutions",
+    "opportunity_id": "trial_id+turn+start_own_main",
+    "snapshot_role": "pre-spend feasibility and realized execution",
+    "status": "phase3",
+    "timing": "own main"
+  },
+  "full_effect_metalcraft_interaction_availability": {
+    "aggregation_grain": "trial-turn-card",
+    "correlated_family": "artifact_affinity_metalcraft",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "interaction card present",
+    "direction": "higher",
+    "event_source": [
+      "opponent_window",
+      "state_snapshot"
+    ],
+    "missing_data": "in_hand false is explicit non-opportunity",
+    "numerator": "payable and metalcraft",
+    "opportunity_id": "trial_id+turn+card",
+    "snapshot_role": "post-spend remainder",
+    "status": "phase3",
+    "timing": "end own turn"
+  },
+  "glint_hawk_functional_execution_and_return_cost": {
+    "aggregation_grain": "Hawk instance",
+    "correlated_family": "hawk_resource",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "Hawk raw cast",
+    "direction": "higher/contextual",
+    "event_source": [
+      "spell_cast",
+      "spell_resolution",
+      "glint_hawk_return",
+      "hawk_land_replay"
+    ],
+    "missing_data": "error if cast lacks resolution",
+    "numerator": "functional resolution and resource-loss fields",
+    "opportunity_id": "trial_id+card uid",
+    "snapshot_role": "execution outcome",
+    "status": "phase3",
+    "timing": "resolution/replay"
+  },
+  "joint_UB_access_by_turn": {
+    "aggregation_grain": "trial-turn",
+    "correlated_family": "color_and_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "primary_pre_spend snapshot",
+    "direction": "higher",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "joint_UB true",
+    "opportunity_id": "trial_id+turn",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "start_own_main"
+  },
+  "land_return_events": {
+    "aggregation_grain": "returned land instance",
+    "correlated_family": "hawk_resource",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "land returned",
+    "direction": "lower/contextual",
+    "event_source": [
+      "glint_hawk_return",
+      "hawk_land_replay"
+    ],
+    "missing_data": "replay may be absent and is explicit",
+    "numerator": "return and replay resource loss",
+    "opportunity_id": "trial_id+uid+return event",
+    "snapshot_role": "execution outcome",
+    "status": "phase3",
+    "timing": "Hawk resolution/replay"
+  },
+  "land_sacrifice_events": {
+    "aggregation_grain": "cast",
+    "correlated_family": "bargain_resource",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "Bargain cast",
+    "direction": "lower",
+    "event_source": [
+      "bargain_cast"
+    ],
+    "missing_data": "zero fields required for nonland sacrifice",
+    "numerator": "battlefield_land_loss/colors_lost/untapped_source_loss",
+    "opportunity_id": "trial_id+event_id",
+    "snapshot_role": "pre-draw cost state",
+    "status": "phase3",
+    "timing": "additional-cost payment"
+  },
+  "metalcraft_rate_by_window": {
+    "aggregation_grain": "trial-turn-window",
+    "correlated_family": "artifact_affinity_metalcraft",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "named primary snapshot",
+    "direction": "higher",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "metalcraft true",
+    "opportunity_id": "trial_id+turn+event_role",
+    "snapshot_role": "declared by event_role",
+    "status": "phase3",
+    "timing": "start or end named window"
+  },
+  "mulligan_count_and_kept_hand_size": {
+    "aggregation_grain": "trial",
+    "correlated_family": "mulligan_early_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "all trials",
+    "direction": "lower/contextual",
+    "event_source": [
+      "opening_hand"
+    ],
+    "missing_data": "error",
+    "numerator": "mulligans and keep_size",
+    "opportunity_id": "trial_id",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "after London bottom"
+  },
+  "munitions_activation_option": {
+    "aggregation_grain": "fixture",
+    "correlated_family": "validation_option",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "targeted fixture",
+    "direction": "descriptive",
+    "event_source": [
+      "munitions_activation"
+    ],
+    "missing_data": "not produced by normal planner",
+    "numerator": "fixture execution only",
+    "opportunity_id": "fixture id",
+    "snapshot_role": "validation-only",
+    "status": "validation_only",
+    "timing": "fixture"
+  },
+  "nihil_optional_black_draw_option": {
+    "aggregation_grain": "trigger",
+    "correlated_family": "card_draw_execution",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "Nihil grave trigger",
+    "direction": "descriptive",
+    "event_source": [
+      "nihil_draw_opportunity",
+      "nihil_draw_paid",
+      "nihil_draw_declined"
+    ],
+    "missing_data": "error if trigger lacks paid/declined outcome",
+    "numerator": "payable and paid separately",
+    "opportunity_id": "nihil opportunity_id",
+    "snapshot_role": "option resolution",
+    "status": "phase3",
+    "timing": "trigger resolution before parent spell"
+  },
+  "opening_land_distribution": {
+    "aggregation_grain": "trial",
+    "correlated_family": "mulligan_early_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "all trials",
+    "direction": "descriptive",
+    "event_source": [
+      "opening_hand"
+    ],
+    "missing_data": "error",
+    "numerator": "count by opening_land_count",
+    "opportunity_id": "trial_id",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "pre-mulligan seven"
+  },
+  "opponent_turn_interaction_availability": {
+    "aggregation_grain": "trial-turn-card",
+    "correlated_family": "interaction_availability_timing",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "interaction card present at modeled opponent window",
+    "direction": "higher",
+    "event_source": [
+      "opponent_window"
+    ],
+    "missing_data": "in_hand false is explicit non-opportunity",
+    "numerator": "payable and resource_preserved",
+    "opportunity_id": "trial_id+turn+card",
+    "snapshot_role": "post-spend remainder",
+    "status": "phase3",
+    "timing": "end own turn"
+  },
+  "realized_etb_tapped_block": {
+    "aggregation_grain": "land play",
+    "correlated_family": "spell_miss_etb_unavailable",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "land play",
+    "direction": "lower",
+    "event_source": [
+      "etb_tempo"
+    ],
+    "missing_data": "error",
+    "numerator": "blocked_action true",
+    "opportunity_id": "trial_id+land uid+event_id",
+    "snapshot_role": "post-entry",
+    "status": "phase3",
+    "timing": "immediately after entry"
+  },
+  "scry_decision_outcome": {
+    "aggregation_grain": "scry",
+    "correlated_family": "card_draw_execution",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "scry event",
+    "direction": "descriptive",
+    "event_source": [
+      "scry_reveal",
+      "scry_resolve"
+    ],
+    "missing_data": "error if reveal lacks resolution in executed trace",
+    "numerator": "kept/bottomed identities",
+    "opportunity_id": "trial_id+event_id",
+    "snapshot_role": "information resolution",
+    "status": "phase3",
+    "timing": "resolution"
+  },
+  "spell_level_on_time_castability": {
+    "aggregation_grain": "card-instance-profile-turn",
+    "correlated_family": "color_and_castability",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "one primary_pre_spend opportunity per card/profile/turn",
+    "direction": "higher",
+    "event_source": [
+      "spell_window",
+      "spell_cast",
+      "spell_resolution"
+    ],
+    "missing_data": "opportunity absent means card not in hand and is excluded",
+    "numerator": "castable or functional resolution for card_instance",
+    "opportunity_id": "spell_window.opportunity_id",
+    "snapshot_role": "pre-spend opportunity",
+    "status": "phase3",
+    "timing": "start_own_main; execution linked by related_opportunity_ids"
+  },
+  "spell_plus_held_interaction_success": {
+    "aggregation_grain": "trial-turn",
+    "correlated_family": "interaction_availability_timing",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "own-main start",
+    "direction": "higher",
+    "event_source": [
+      "multi_action_window",
+      "spell_resolution",
+      "opponent_window"
+    ],
+    "missing_data": "error",
+    "numerator": "functional spell and payable reply",
+    "opportunity_id": "trial_id+turn",
+    "snapshot_role": "mixed pre/post explicitly joined",
+    "status": "phase3",
+    "timing": "own main through opponent window"
+  },
+  "stranded_spell_reason": {
+    "aggregation_grain": "card-instance-profile-turn",
+    "correlated_family": "spell_miss_etb_unavailable",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "primary_pre_spend due opportunity",
+    "direction": "lower",
+    "event_source": [
+      "spell_window"
+    ],
+    "missing_data": "exclude absent cards",
+    "numerator": "failure_reason count when castable false",
+    "opportunity_id": "spell_window.opportunity_id",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "start_own_main"
+  },
+  "unavailable_tapped_mana": {
+    "aggregation_grain": "trial-turn-window",
+    "correlated_family": "spell_miss_etb_unavailable",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "named primary snapshot",
+    "direction": "lower/contextual",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "unavailable_tapped_mana",
+    "opportunity_id": "trial_id+turn+event_role",
+    "snapshot_role": "declared by event_role",
+    "status": "phase3",
+    "timing": "named window"
+  },
+  "unused_mana": {
+    "aggregation_grain": "trial-turn",
+    "correlated_family": "spell_miss_etb_unavailable",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "primary_post_spend snapshot",
+    "direction": "lower/contextual",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "usable_untapped_mana",
+    "opportunity_id": "trial_id+turn+event_role",
+    "snapshot_role": "post-spend remainder",
+    "status": "phase3",
+    "timing": "end_own_turn_opponent_window"
+  },
+  "usable_untapped_mana_by_turn": {
+    "aggregation_grain": "trial-turn",
+    "correlated_family": "spell_miss_etb_unavailable",
+    "deduplication": "exactly one row per opportunity_id and event_role; reject duplicates",
+    "denominator": "primary_pre_spend snapshot",
+    "direction": "higher",
+    "event_source": [
+      "state_snapshot"
+    ],
+    "missing_data": "error",
+    "numerator": "usable_untapped_mana",
+    "opportunity_id": "trial_id+turn+event_role",
+    "snapshot_role": "pre-spend",
+    "status": "phase3",
+    "timing": "start_own_main"
+  }
+}

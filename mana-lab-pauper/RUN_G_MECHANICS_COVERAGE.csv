@@ -1,0 +1,29 @@
+mechanic,status,implementation,test_evidence,phase3_treatment,ranking_relevance,readiness_blocker
+artifact lands,IMPLEMENTED + TESTED,cards/state/simulator,test_input_integrity.py; test_candidates.py,production state and artifact count,yes,false
+ETB-tapped Bridges,IMPLEMENTED + TESTED,state/simulator,test_tapped_lands.py; test_run_c_metrics_statistics_permutations.py,actual tapped entry and realized blockage events,yes,false
+Giant's Boulder deployment,IMPLEMENTED + TESTED,simulator/effects,test_boulder.py; test_run_e_d03_information_continuation.py,production legal action,yes,false
+Giant's Boulder filtering and tap limits,IMPLEMENTED + TESTED,payment/effects,test_boulder.py; test_run_e_d09_boulder_metrics.py,net-zero payment action with one tap per permanent,yes,false
+Giant's Boulder scry,IMPLEMENTED + TESTED,effects/policies,test_scry_no_lookahead.py; test_run_c_causal.py,baseline and alternate frozen policies,yes,false
+affinity and generic cost reduction,IMPLEMENTED + TESTED,mana/payment/simulator,test_affinity.py; test_run_c_payment_and_sequencing.py,production payment uses live artifact count,yes,false
+artifact count and Metalcraft,IMPLEMENTED + TESTED,state/effects,test_metalcraft.py; test_run_c_mechanics.py,separate artifact and full-effect metrics,yes,false
+Baleful Strix distinct UB payment,IMPLEMENTED + TESTED,payment/simulator,test_payment.py; test_run_c_payment_and_sequencing.py,production spell window and functional resolution,yes,false
+Dispatch white payment,IMPLEMENTED + TESTED,payment/simulator,test_opponent_reserve.py,raw W availability,yes,false
+Dispatch Metalcraft distinction,IMPLEMENTED + TESTED,state/simulator,test_metalcraft.py; test_run_e_d08_metric_windows.py,separate full-effect availability,yes,false
+Glint Hawk return and replay,IMPLEMENTED + TESTED,effects/simulator,test_glint_hawk.py; test_run_e_d06_hawk_functionality.py,mandatory functional resolution and resource loss,yes,false
+Reckoner's Bargain payment sacrifice and resource effects,IMPLEMENTED + TESTED,effects/simulator,test_bargain.py; test_run_e_d04_bargain_land_loss.py; test_run_e_d05_trigger_composition.py,production action with explicit losses,yes,false
+Thoughtcast affinity and draw,IMPLEMENTED + TESTED,simulator,test_affinity.py; test_run_e_d03_information_continuation.py,production action and causal information boundary,yes,false
+Myr Enforcer affinity,IMPLEMENTED + TESTED,simulator/validation,test_myr_enforcer.py; test_affinity.py,production payment and impossibility fixture,yes,false
+Refurbished Familiar affinity,IMPLEMENTED + TESTED,simulator,test_familiar.py; test_affinity.py,production payment,yes,false
+Refurbished Familiar opponent-dependent draw,NOT MATERIAL,simulator/test fixture,test_familiar.py,no baseline draw value; excluded from objectives; sensitivity fixture records zero versus available counterfactual,no,false
+Utrom Monitor affinity,IMPLEMENTED + TESTED,simulator/payment,test_affinity.py; test_run_c_payment_and_sequencing.py,production payment,yes,false
+Cryogen Relic enter and leave draws,IMPLEMENTED + TESTED,effects/simulator,test_cryogen.py; test_run_e_d05_trigger_composition.py,production triggers and draw events,yes,false
+opponent-turn Blast Dispatch Bargain availability,IMPLEMENTED + TESTED,policies/simulator,test_opponent_reserve.py; test_run_e_d08_metric_windows.py,raw payable before/after own-turn spend; no target probability,yes,false
+Blood token activation,IMPLEMENTED + TESTED,effects,test_blood_token.py,raw counterfactual option sensitivity only; excluded from competitive profiles,no,false
+Blood Fountain late recursion,NOT MATERIAL,frozen containment,no production target model,excluded from turn-4 competitive profiles; report resource option only; no speculative target-arrival value,no,false
+Nihil Spellbomb optional black draw,IMPLEMENTED + TESTED,effects/simulator,test_spellbomb.py; test_run_e_d11_option_events.py,production opportunity paid/declined events,yes,false
+Makeshift Munitions activation,IMPLEMENTED + TESTED,effects,test_run_c_mechanics.py,raw option sensitivity with explicit target fixture only; excluded from competitive profiles,no,false
+Cryogen stun activation,IMPLEMENTED + TESTED,effects,test_cryogen.py,raw option sensitivity with explicit tapped-target fixture only; excluded from competitive profiles,no,false
+opponent target arrival/value,NOT MATERIAL,model boundary,mechanic registry validation,no probability or value assumed; raw option availability only and excluded from profiles,no,false
+opponent removal and Bridge indestructibility,NOT MATERIAL,goldfish model boundary,mechanic registry validation,no opponent-removal process in Phase 3; declared model-risk sensitivity boundary,no,false
+London mulligan,IMPLEMENTED + TESTED,mulligan,test_mulligan.py; test_mulligan_no_lookahead.py,baseline and alternate frozen policies,yes,false
+play versus draw,IMPLEMENTED + TESTED,state/simulator,test_play_draw.py,paired 50/50 scenarios plus all-play/all-draw robustness,yes,false

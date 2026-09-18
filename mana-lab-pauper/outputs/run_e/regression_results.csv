@@ -1,0 +1,12 @@
+issue,result,tests,pattern
+D-01,PASS,6,test_run_e_d01_*.py
+D-02,PASS,3,test_run_e_d02_*.py
+D-03,PASS,5,test_run_e_d03_*.py
+D-04,PASS,4,test_run_e_d04_*.py
+D-05,PASS,5,test_run_e_d05_*.py
+D-06,PASS,3,test_run_e_d06_*.py
+D-07,PASS,5,test_run_e_d07_*.py
+D-08,PASS,3,test_run_e_d08_*.py
+D-09,PASS,3,test_run_e_d09_*.py
+D-10,PASS,3,test_run_e_d10_*.py
+D-11,PASS,2,test_run_e_d11_*.py

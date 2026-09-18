@@ -1,0 +1,5 @@
+python=3.12.14
+implementation=CPython
+platform=Linux-6.18.44-x86_64-with-glibc2.39
+test_runner=unittest (standard library)
+pyyaml=6.0.3

@@ -1,0 +1,200 @@
+[
+  {
+    "class": "boulder_multiple_spells",
+    "depths": {
+      "10": {
+        "max_actions": 2,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 13
+      },
+      "7": {
+        "max_actions": 2,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 13
+      },
+      "8": {
+        "max_actions": 2,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 13
+      },
+      "9": {
+        "max_actions": 2,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 13
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_information_value": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+    }
+  },
+  {
+    "class": "affinity_changes_mid_sequence",
+    "depths": {
+      "10": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 25
+      },
+      "7": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 25
+      },
+      "8": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 25
+      },
+      "9": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 25
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_information_value": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+    }
+  },
+  {
+    "class": "hawk_return_replay_competing_lines",
+    "depths": {
+      "10": {
+        "max_actions": 3,
+        "root": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ())))",
+        "selected": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 26
+      },
+      "7": {
+        "max_actions": 3,
+        "root": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ())))",
+        "selected": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 26
+      },
+      "8": {
+        "max_actions": 3,
+        "root": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ())))",
+        "selected": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 26
+      },
+      "9": {
+        "max_actions": 3,
+        "root": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ())))",
+        "selected": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 26
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_information_value": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+    }
+  },
+  {
+    "class": "interaction_hold_vs_development",
+    "depths": {
+      "10": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 10
+      },
+      "7": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 10
+      },
+      "8": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 10
+      },
+      "9": {
+        "max_actions": 2,
+        "root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 10
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_information_value": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+    }
+  },
+  {
+    "class": "representative_double_spell",
+    "depths": {
+      "10": {
+        "max_actions": 4,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 127
+      },
+      "7": {
+        "max_actions": 4,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 127
+      },
+      "8": {
+        "max_actions": 4,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 127
+      },
+      "9": {
+        "max_actions": 4,
+        "root": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "states": 127
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+      "conservative_information_value": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+    }
+  },
+  {
+    "class": "bargain_resource_and_trigger_composition",
+    "depths": {
+      "10": {
+        "max_actions": 2,
+        "root": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+        "states": 29
+      },
+      "7": {
+        "max_actions": 2,
+        "root": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+        "states": 29
+      },
+      "8": {
+        "max_actions": 2,
+        "root": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+        "states": 29
+      },
+      "9": {
+        "max_actions": 2,
+        "root": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "selected": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+        "states": 29
+      }
+    },
+    "information_choices": {
+      "baseline_information_value": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+      "conservative_information_value": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))"
+    }
+  }
+]

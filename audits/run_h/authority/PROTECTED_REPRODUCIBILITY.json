@@ -1,0 +1,21 @@
+{
+  "fresh_extraction_a_tests": {
+    "ran": 179,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 15.266
+  },
+  "fresh_extraction_b_tests": {
+    "ran": 179,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 15.368
+  },
+  "fresh_run_e_exit_code": 0,
+  "focused_d01_d11_tests": 42,
+  "no_lookahead_tests": 18,
+  "protected_candidate_order_normalized_raw_events_equal": true,
+  "protected_candidate_label_renamed_summary_equal": true,
+  "protected_candidate_label_renamed_raw_events_equal": true,
+  "protected_trial_event_count": 362
+}

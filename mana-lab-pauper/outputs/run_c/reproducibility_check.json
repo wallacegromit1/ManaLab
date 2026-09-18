@@ -1,0 +1,18 @@
+{
+  "decompressed_or_plain_content_equal": true,
+  "files": {
+    "production_smoke_manifest.json": [
+      "e238e89d1b066b709208872a5e3644a70d0e76f4a83783214cab678beb85c034",
+      "e238e89d1b066b709208872a5e3644a70d0e76f4a83783214cab678beb85c034"
+    ],
+    "production_smoke_raw_events.jsonl.gz": [
+      "fb2f08126d43b37c8af12f493f68a85704c8448f89f884bc192807139b941b9d",
+      "fb2f08126d43b37c8af12f493f68a85704c8448f89f884bc192807139b941b9d"
+    ],
+    "production_smoke_summary_rows.csv.gz": [
+      "7709d5d636607df2fdbc4b338add83e3c6bf7764e76f097840ff48fc20d3f408",
+      "7709d5d636607df2fdbc4b338add83e3c6bf7764e76f097840ff48fc20d3f408"
+    ]
+  },
+  "same_config_and_seed": true
+}

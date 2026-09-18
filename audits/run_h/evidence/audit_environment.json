@@ -1,0 +1,16 @@
+{
+  "authority_hashes": {
+    "AUDIT_HELPER_OUTPUT.json": "90edf48ad85fd9434dcd316ffbb49b301b9f2c04168421d8c9ff08ef324dba12",
+    "MANIFEST_RECONCILIATION.json": "fe4552389bbcddfc5542f727bd7e5e2f7e726c27e807debd676df34cb1631709",
+    "PROTECTED_REPRODUCIBILITY.json": "4af164bd5cac073597f5463d39aba386f0dd86ed8b9ba593ee9b2af099fd67e8",
+    "RUN_F_ACCEPTANCE_MATRIX.csv": "bbe9a1f240fbed88f52548a05cdd78e7b414f31494cbafe47d6f7cafd1fbb89a",
+    "RUN_F_DEFECTS.md": "5f203bf74feb09bc159b57a9491daafe0e655748a9b53d8f86d995937f0a2e42",
+    "RUN_F_PHASE3_AUTHORIZATION_REPORT.md": "a100c5b078b36cdb97aa1c07fced6b2b474a8fd0b0e073ae1913eb626cf072a1",
+    "RUN_F_PHASE3_FROZEN_CONFIG.md": "2232729ed617ff98a37cd2274b6c8f063e58989c4fe486c40fffe463d8aa688c",
+    "RUN_F_REPRODUCIBILITY.md": "86b3885fce74ff77d8c1dda9a1ebba5e4d5a810c2b8b0a31b1728a968876510a",
+    "audit_helpers.py": "2e9b6d91bbdd926ac4bb3f99f0ac6aa596618827a11227f154dd59b712216097"
+  },
+  "platform": "Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "python": "3.14.7 (main, Aug 10 2026, 00:00:00) [GCC 16.1.1 20260515 (Red Hat 16.1.1-2)]",
+  "source_root": "/home/monkeyd/.codex/.chatgpt-projects/g-p-6aac55b1902881918f3322dda2a2dfea/run_h_work/a/mana-lab-pauper"
+}

@@ -1,0 +1,29 @@
+test_future_library_order_does_not_change_keep_or_bottom (test_mulligan_no_lookahead.MulliganNoLookaheadTests.test_future_library_order_does_not_change_keep_or_bottom) ... ok
+test_hidden_library_sentinel_land_decisions (test_policies_no_lookahead.PolicyNoLookaheadTests.test_hidden_library_sentinel_land_decisions) ... ok
+test_land_policy_deterministic (test_policies_no_lookahead.PolicyNoLookaheadTests.test_land_policy_deterministic) ... ok
+test_no_candidate_specific_policy_branch (test_policies_no_lookahead.PolicyNoLookaheadTests.test_no_candidate_specific_policy_branch) ... ok
+test_policy_signature_has_no_candidate_identity (test_policies_no_lookahead.PolicyNoLookaheadTests.test_policy_signature_has_no_candidate_identity) ... ok
+test_bottom_both_does_not_reconsult_new_top (test_scry_no_lookahead.ScryNoLookaheadTests.test_bottom_both_does_not_reconsult_new_top) ... ok
+test_policy_cannot_access_library (test_scry_no_lookahead.ScryNoLookaheadTests.test_policy_cannot_access_library) ... ok
+test_same_top_two_different_third_same_decision (test_scry_no_lookahead.ScryNoLookaheadTests.test_same_top_two_different_third_same_decision) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.186s
+
+OK
+
+test_after_draw_later_decision_may_change (test_run_c_causal.RunCCausalTests.test_after_draw_later_decision_may_change) ... ok
+test_bargain_sacrifice_choice_invariant (test_run_c_causal.RunCCausalTests.test_bargain_sacrifice_choice_invariant) ... ok
+test_boulder_prescry_invariant (test_run_c_causal.RunCCausalTests.test_boulder_prescry_invariant) ... ok
+test_cryogen_predraw_invariant (test_run_c_causal.RunCCausalTests.test_cryogen_predraw_invariant) ... ok
+test_hawk_return_choice_invariant (test_run_c_causal.RunCCausalTests.test_hawk_return_choice_invariant) ... ok
+test_identical_visible_state_different_hidden_library_same_root (test_run_c_causal.RunCCausalTests.test_identical_visible_state_different_hidden_library_same_root) ... ok
+test_mulligan_keep_and_bottom_ignore_hidden (test_run_c_causal.RunCCausalTests.test_mulligan_keep_and_bottom_ignore_hidden) ... ok
+test_payment_choice_invariant (test_run_c_causal.RunCCausalTests.test_payment_choice_invariant) ... ok
+test_strix_precast_invariant (test_run_c_causal.RunCCausalTests.test_strix_precast_invariant) ... ok
+test_thoughtcast_precast_invariant (test_run_c_causal.RunCCausalTests.test_thoughtcast_precast_invariant) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.245s
+
+OK

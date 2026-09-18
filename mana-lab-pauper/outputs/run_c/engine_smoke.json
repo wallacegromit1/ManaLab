@@ -1,0 +1,62 @@
+{
+  "land_distribution": {
+    "0": {
+      "exact": 0.0582121625371187,
+      "observed": 0.0593,
+      "pass": true,
+      "tolerance": 0.006622598080504102
+    },
+    "1": {
+      "exact": 0.22120621764105108,
+      "observed": 0.22,
+      "pass": true,
+      "tolerance": 0.011739643160436897
+    },
+    "2": {
+      "exact": 0.3318093264615766,
+      "observed": 0.32535,
+      "pass": true,
+      "tolerance": 0.013318014787037638
+    },
+    "3": {
+      "exact": 0.2540882229660722,
+      "observed": 0.2596,
+      "pass": true,
+      "tolerance": 0.012313485222828371
+    },
+    "4": {
+      "exact": 0.10698451493308302,
+      "observed": 0.1089,
+      "pass": true,
+      "tolerance": 0.008742486076516951
+    },
+    "5": {
+      "exact": 0.02468873421532685,
+      "observed": 0.024,
+      "pass": true,
+      "tolerance": 0.005
+    },
+    "6": {
+      "exact": 0.002880352325121466,
+      "observed": 0.0027,
+      "pass": true,
+      "tolerance": 0.005
+    },
+    "7": {
+      "exact": 0.00013046892065010125,
+      "observed": 0.00015,
+      "pass": true,
+      "tolerance": 0.005
+    }
+  },
+  "pass": true,
+  "purpose": "cheap engine smoke only; no production policy and no ranking",
+  "seed": 2026091702,
+  "source_presence_observed": {
+    "B": 0.6008,
+    "R": 0.39595,
+    "U": 0.59735,
+    "W": 0.48215
+  },
+  "trials": 20000
+}

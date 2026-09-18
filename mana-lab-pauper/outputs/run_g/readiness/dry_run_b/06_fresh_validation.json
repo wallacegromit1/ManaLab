@@ -1,0 +1,14 @@
+{
+  "artifact_content_hash": "b72e19d0d2f6bf2fd00ace5d000b88379eb53000b154a16273a10270b31e76d3",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "fresh_partition_verified": true,
+  "mode": "READINESS_DRY_RUN",
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "selection_seed_used": false,
+  "stage": "06_fresh_validation",
+  "status": "PASS",
+  "upstream_hash": "64345debe882d77f8ca8735882d5c9703d96e1aa32ec227c16422df702dcf653",
+  "validation_seed": 2026091702
+}

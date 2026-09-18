@@ -1,0 +1,283 @@
+{
+  "banner": "MACHINERY VALIDATION ONLY \u2014 NOT A RANKING / NOT AN OPTIMIZATION",
+  "event_file": "production_smoke_summary_rows.csv.gz",
+  "policy": "production_visible_state_planner_all_trials",
+  "raw_event_file": "production_smoke_raw_events.jsonl.gz",
+  "selection_seed_used": false,
+  "summaries": {
+    "mixed|alternate_landcount_london|alternate_tempo_untapped": {
+      "C0": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 1.0,
+          "R_t2": 0.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 0.0,
+          "artifacts_t3": 3.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 2.0,
+          "policy_decisions": 4.0,
+          "raw_B": 1.0,
+          "raw_R": 0.0,
+          "raw_U": 0.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 2.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      },
+      "HISTORICAL_C1_REGRESSION": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 1.0,
+          "R_t2": 0.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 0.0,
+          "artifacts_t3": 3.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 2.0,
+          "policy_decisions": 4.0,
+          "raw_B": 1.0,
+          "raw_R": 0.0,
+          "raw_U": 0.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 3.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      }
+    },
+    "mixed|alternate_landcount_london|baseline_hand_demand": {
+      "C0": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 0.0,
+          "R_t2": 1.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 0.0,
+          "artifacts_t3": 5.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 0.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 1.0,
+          "raw_U": 1.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 7.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      },
+      "HISTORICAL_C1_REGRESSION": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 0.0,
+          "R_t2": 1.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 0.0,
+          "artifacts_t3": 5.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 0.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 1.0,
+          "raw_U": 1.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 7.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      }
+    },
+    "mixed|baseline_functional_london|alternate_tempo_untapped": {
+      "C0": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 0.0,
+          "R_t2": 0.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 1.0,
+          "artifacts_t3": 3.0,
+          "boulder_deployed": 0.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 2.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 0.0,
+          "raw_U": 1.0,
+          "raw_W": 1.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 2.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      },
+      "HISTORICAL_C1_REGRESSION": {
+        "mulligan_distribution": {
+          "0": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 0.0,
+          "R_t2": 0.0,
+          "UB_t2": 0.0,
+          "U_t2": 0.0,
+          "W_t2": 1.0,
+          "artifacts_t3": 3.0,
+          "boulder_deployed": 0.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 2.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 0.0,
+          "raw_U": 1.0,
+          "raw_W": 1.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 2.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 2.0,
+          "usable_mana_t4": 3.0
+        },
+        "raw_opening_land_distribution": {
+          "2": 1.0
+        },
+        "trials": 1
+      }
+    },
+    "mixed|baseline_functional_london|baseline_hand_demand": {
+      "C0": {
+        "mulligan_distribution": {
+          "2": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 1.0,
+          "R_t2": 1.0,
+          "UB_t2": 0.0,
+          "U_t2": 1.0,
+          "W_t2": 1.0,
+          "artifacts_t3": 4.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 0.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 0.0,
+          "raw_U": 1.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 6.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 1.0,
+          "usable_mana_t4": 1.0
+        },
+        "raw_opening_land_distribution": {
+          "1": 1.0
+        },
+        "trials": 1
+      },
+      "HISTORICAL_C1_REGRESSION": {
+        "mulligan_distribution": {
+          "2": 1.0
+        },
+        "rates_and_means": {
+          "B_t2": 1.0,
+          "R_t2": 1.0,
+          "UB_t2": 0.0,
+          "U_t2": 1.0,
+          "W_t2": 1.0,
+          "artifacts_t3": 4.0,
+          "boulder_deployed": 1.0,
+          "metalcraft_t3": 1.0,
+          "on_play": 1.0,
+          "opponent_options_t3": 0.0,
+          "policy_decisions": 4.0,
+          "raw_B": 0.0,
+          "raw_R": 0.0,
+          "raw_U": 1.0,
+          "raw_W": 0.0,
+          "raw_joint_UB": 0.0,
+          "replicate": 2026091702.0,
+          "spells_cast": 6.0,
+          "usable_mana_t1": 0.0,
+          "usable_mana_t2": 1.0,
+          "usable_mana_t3": 1.0,
+          "usable_mana_t4": 1.0
+        },
+        "raw_opening_land_distribution": {
+          "1": 1.0
+        },
+        "trials": 1
+      }
+    }
+  },
+  "trials_per_scenario_candidate": 1,
+  "validation_seed": 2026091702
+}

@@ -1,0 +1,68 @@
+{
+  "D-01": {
+    "pattern": "test_run_e_d01_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 6
+  },
+  "D-02": {
+    "pattern": "test_run_e_d02_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 3
+  },
+  "D-03": {
+    "pattern": "test_run_e_d03_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 5
+  },
+  "D-04": {
+    "pattern": "test_run_e_d04_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 4
+  },
+  "D-05": {
+    "pattern": "test_run_e_d05_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 5
+  },
+  "D-06": {
+    "pattern": "test_run_e_d06_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 3
+  },
+  "D-07": {
+    "pattern": "test_run_e_d07_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 5
+  },
+  "D-08": {
+    "pattern": "test_run_e_d08_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 3
+  },
+  "D-09": {
+    "pattern": "test_run_e_d09_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 3
+  },
+  "D-10": {
+    "pattern": "test_run_e_d10_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 3
+  },
+  "D-11": {
+    "pattern": "test_run_e_d11_*.py",
+    "result": "PASS",
+    "returncode": 0,
+    "tests": 2
+  }
+}

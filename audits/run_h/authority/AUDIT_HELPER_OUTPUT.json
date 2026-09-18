@@ -1,0 +1,47 @@
+{
+  "candidate_space": {
+    "c0_occurrences": 1,
+    "candidate_set_sha256": "d9bff0652d2d449f761205575b63af0db5205c3354705c82302fa8b649de78e3",
+    "count": 296706,
+    "inclusion_exclusion_count": 296706,
+    "minimum_bridges": 3,
+    "same_set_as_production_generator": true,
+    "three_bridge_candidates": 56,
+    "unique": 296706
+  },
+  "frozen_input": {
+    "deck_size": 60,
+    "nonlands": 41,
+    "lands": 19,
+    "giants_boulder": 4
+  },
+  "phase3_freeze_gaps": {
+    "phase": "RUN_C_REMEDIATION_VALIDATE_ONLY",
+    "optimization_allowed": false,
+    "screening_enabled": false,
+    "screening_trials": 0,
+    "medium_trials": 0,
+    "finalist_count_target": 0,
+    "validation_trials": 0,
+    "named_profile_count": 6,
+    "defined_profile_count": 0
+  },
+  "synthetic_counterexamples": {
+    "pareto_direction": {
+      "metric": "unused_mana (lower is better)",
+      "left": 5.0,
+      "right": 1.0,
+      "shipped_helper_says_left_dominates": true,
+      "expected": false
+    },
+    "alternate_tap_out": {
+      "configured_policy": "tap_out_development; reserve nothing solely for opponent turn",
+      "equal_options_selected": "reserve",
+      "expected_for_true_tap_out": "tap-out"
+    }
+  },
+  "zip_sha256": {
+    "expected": "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71",
+    "observed": "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71"
+  }
+}

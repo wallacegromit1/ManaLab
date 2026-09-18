@@ -1,0 +1,13 @@
+test_future_library_order_does_not_change_keep_or_bottom (test_mulligan_no_lookahead.MulliganNoLookaheadTests.test_future_library_order_does_not_change_keep_or_bottom) ... ok
+test_hidden_library_sentinel_land_decisions (test_policies_no_lookahead.PolicyNoLookaheadTests.test_hidden_library_sentinel_land_decisions) ... ok
+test_land_policy_deterministic (test_policies_no_lookahead.PolicyNoLookaheadTests.test_land_policy_deterministic) ... ok
+test_no_candidate_specific_policy_branch (test_policies_no_lookahead.PolicyNoLookaheadTests.test_no_candidate_specific_policy_branch) ... ok
+test_policy_signature_has_no_candidate_identity (test_policies_no_lookahead.PolicyNoLookaheadTests.test_policy_signature_has_no_candidate_identity) ... ok
+test_bottom_both_does_not_reconsult_new_top (test_scry_no_lookahead.ScryNoLookaheadTests.test_bottom_both_does_not_reconsult_new_top) ... ok
+test_policy_cannot_access_library (test_scry_no_lookahead.ScryNoLookaheadTests.test_policy_cannot_access_library) ... ok
+test_same_top_two_different_third_same_decision (test_scry_no_lookahead.ScryNoLookaheadTests.test_same_top_two_different_third_same_decision) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.196s
+
+OK

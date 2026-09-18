@@ -1,0 +1,20 @@
+{
+  "artifact_content_hash": "ff2e42cccd4cd95f701bf1902deb182e52c90c3853d338f4e84cb944c9df6e72",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "mode": "READINESS_DRY_RUN",
+  "policy_drift_guard": true,
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "scenario_ids": [
+    "baseline_primary",
+    "alternate_mulligan",
+    "tempo_tapout",
+    "alternate_scry_information",
+    "all_play",
+    "all_draw",
+    "target_dependent_options_raw_only"
+  ],
+  "stage": "07_robustness",
+  "status": "PASS"
+}

@@ -1,0 +1,17 @@
+{
+  "artifact_content_hash": "80ac97f3f36edf042c27e509f268a9fcb062476d43f1fbf5e5ad131dbc21f493",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "mode": "READINESS_DRY_RUN",
+  "ranking_produced": false,
+  "real_frontier_constructed": false,
+  "recommendation_produced": false,
+  "stage": "08_frontier",
+  "status": "PASS",
+  "uncertainty_aware_relation_fixtures": {
+    "dominant": "dominates",
+    "lower_is_better": "dominates",
+    "tied": "practically_equivalent",
+    "uncertain": "unresolved"
+  }
+}

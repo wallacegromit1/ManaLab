@@ -1,0 +1,11 @@
+{
+  "fresh_extraction": "extract_c",
+  "packaged_source_test_config_files": 63,
+  "manifest_entries": 166,
+  "packaged_files_missing_from_manifest": 0,
+  "manifest_entries_missing_from_package": 103,
+  "missing_entry_class": "__pycache__/*.pyc",
+  "hash_mismatches_for_packaged_files": 0,
+  "git_revision_resolvable": false,
+  "fresh_run_reported_commit": "UNAVAILABLE"
+}

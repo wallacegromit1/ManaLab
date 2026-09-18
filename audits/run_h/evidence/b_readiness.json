@@ -1,0 +1,179 @@
+{
+  "checks": {
+    "candidate_space": {
+      "bridge_histogram": {
+        "10": 60240,
+        "11": 52266,
+        "12": 35020,
+        "13": 16860,
+        "14": 6024,
+        "15": 1246,
+        "3": 56,
+        "4": 504,
+        "5": 2460,
+        "6": 8520,
+        "7": 20646,
+        "8": 38040,
+        "9": 54824
+      },
+      "c0_occurrences": 1,
+      "dp_count": 296706,
+      "enumeration_count": 296706,
+      "minimum_bridges": 3,
+      "pass": true,
+      "three_bridge_candidates": 56,
+      "unique_keys": 296706
+    },
+    "config_policy_metric_contracts": {
+      "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+      "pass": true
+    },
+    "dry_run_reproducibility": {
+      "manifest_hash_a": "3bf1220ebbee61d959bafde1e4429f228897e99d057c90aab35844a2f767af74",
+      "manifest_hash_b": "3bf1220ebbee61d959bafde1e4429f228897e99d057c90aab35844a2f767af74",
+      "pass": true,
+      "ranking_produced": false
+    },
+    "full_tests": {
+      "pass": true,
+      "returncode": 0,
+      "tests": 205
+    },
+    "mechanics": {
+      "implemented_tested": 24,
+      "not_material_contained": 4,
+      "pass": true,
+      "ranking_relevant_gaps": 0,
+      "rows": 28
+    },
+    "parent_integrity": {
+      "expected_sha256": "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71",
+      "observed_sha256": "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71",
+      "pass": true,
+      "path": "/home/monkeyd/Documents/Mana_Lab_Pauper_v1_Run_E.zip"
+    },
+    "planner_depth": {
+      "acceptance_rule": "all six predeclared structural fixtures have identical selected roots at depths 7/8/9",
+      "depths": [
+        7,
+        8,
+        9
+      ],
+      "pass": true,
+      "required_structural_classes": [
+        "affinity_changes_mid_sequence",
+        "bargain_resource_and_trigger_composition",
+        "boulder_multiple_spells",
+        "hawk_return_replay_competing_lines",
+        "interaction_hold_vs_development",
+        "representative_double_spell"
+      ],
+      "reserve_sensitivity": {
+        "baseline_root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+        "both_executable": true,
+        "tap_out_root": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'R', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+      },
+      "rows": [
+        {
+          "root_choices": {
+            "7": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "8": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "9": "('spell', 'Baleful Strix', ((('g-depth-land-0', 'U', ''), ('g-depth-land-1', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-2', 'B', 'g-boulder'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+          },
+          "stable": true,
+          "structural_class": "boulder_multiple_spells",
+          "terminal_state_counts": {
+            "7": 13,
+            "8": 13,
+            "9": 13
+          }
+        },
+        {
+          "root_choices": {
+            "7": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "8": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "9": "('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'B', 'g-existing'),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Refurbished Familiar', ((('g-depth-land-1', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+          },
+          "stable": true,
+          "structural_class": "affinity_changes_mid_sequence",
+          "terminal_state_counts": {
+            "7": 25,
+            "8": 25,
+            "9": 25
+          }
+        },
+        {
+          "root_choices": {
+            "7": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "8": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "9": "('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Cryogen Relic', False, False, (), False, ()))) > ('spell', 'Cryogen Relic', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+          },
+          "stable": true,
+          "structural_class": "hawk_return_replay_competing_lines",
+          "terminal_state_counts": {
+            "7": 26,
+            "8": 26,
+            "9": 26
+          }
+        },
+        {
+          "root_choices": {
+            "7": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "8": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "9": "('spell', 'Nihil Spellbomb', ((('g-depth-land-2', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Thoughtcast', ((('g-depth-land-1', 'U', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+          },
+          "stable": true,
+          "structural_class": "interaction_hold_vs_development",
+          "terminal_state_counts": {
+            "7": 10,
+            "8": 10,
+            "9": 10
+          }
+        },
+        {
+          "root_choices": {
+            "7": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "8": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))",
+            "9": "('spell', 'Baleful Strix', ((('g-depth-land-1', 'U', ''), ('g-depth-land-2', 'B', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', 'Glint Hawk', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'return', ('target', ('Ancient Den', False, True, ('W',), False, ()))) > ('land', 'Ancient Den') > ('spell', 'Nihil Spellbomb', ((('g-depth-land-0', 'W', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))))"
+          },
+          "stable": true,
+          "structural_class": "representative_double_spell",
+          "terminal_state_counts": {
+            "7": 127,
+            "8": 127,
+            "9": 127
+          }
+        },
+        {
+          "root_choices": {
+            "7": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+            "8": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))",
+            "9": "('spell', 'Refurbished Familiar', ((('g-depth-land-0', 'B', ''),), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0)))) > ('spell', \"Reckoner's Bargain\", ((('g-depth-land-1', 'B', ''), ('g-depth-land-2', 'W', '')), (('W', 0), ('U', 0), ('B', 0), ('R', 0), ('G', 0), ('C', 0))), 'sac', ('Refurbished Familiar', False, False, (), False, ()))"
+          },
+          "stable": true,
+          "structural_class": "bargain_resource_and_trigger_composition",
+          "terminal_state_counts": {
+            "7": 29,
+            "8": 29,
+            "9": 29
+          }
+        }
+      ],
+      "states_tested": 6,
+      "unstable_classes": []
+    },
+    "provenance_manifest": {
+      "pass": true,
+      "path": "outputs/run_g/source_config_manifest.json"
+    }
+  },
+  "failures": [],
+  "no_optimization_attestation": {
+    "frontier_constructed": false,
+    "ranking_performed": false,
+    "real_candidate_performance_evaluated": false,
+    "recommendation_made": false
+  },
+  "status": "PASS",
+  "verdict": "RUN G IMPLEMENTATION \u2014 READY FOR INDEPENDENT PHASE 3 AUTHORIZATION"
+}

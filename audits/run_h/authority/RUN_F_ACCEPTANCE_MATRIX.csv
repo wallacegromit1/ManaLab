@@ -1,0 +1,135 @@
+gate_id,category,requirement,evidence,status,severity,blocking,notes
+PKG-01,Package,ZIP SHA-256 matches expected,"82d1...c71 observed and expected",PASS,NOTE,false,
+PKG-02,Package,Archive extracts cleanly,"Three fresh extractions",PASS,NOTE,false,
+PKG-03,Package,Required repository files exist,"src tests configs docs benchmarks outputs present",PASS,NOTE,false,
+PKG-04,Package,Manifest entries reconcile,"166 source-manifest entries versus 63 packaged files; 103 absent pyc entries",FAIL,MAJOR,true,F-08
+PKG-05,Package,Configuration hashes reproducible,"Packaged source/config/test files match their individual entries",PARTIAL,MAJOR,true,Manifest polluted by absent caches
+PKG-06,Package,Code version provenance recoverable,"Claimed commit is not resolvable; fresh run says UNAVAILABLE",FAIL,MAJOR,true,F-08
+PKG-07,Package,Dependencies explicit enough,"Python >=3.11 and PyYAML >=6.0",PASS,NOTE,false,
+PKG-08,Package,Validation commands work fresh,"Tests and run-e complete",PASS,NOTE,false,
+PKG-09,Package,Caches cannot alter or invalidate provenance,"Cache paths captured by source manifest",FAIL,MAJOR,true,F-08
+INP-01,Frozen input,Exact deck size,"60",PASS,NOTE,false,
+INP-02,Frozen input,Exactly 41 frozen nonlands,"Independent loader and tests",PASS,NOTE,false,
+INP-03,Frozen input,Exactly 19 lands,"Independent loader and tests",PASS,NOTE,false,
+INP-04,Frozen input,Exactly four Giant's Boulders,"Independent loader and tests",PASS,NOTE,false,
+INP-05,Frozen input,C0 reconstructs exactly,"3 Den 4 Seat 4 Vault 4 Furnace 1 Razortide 1 Goldmire 2 Mistvault",PASS,NOTE,false,
+INP-06,Frozen input,Candidate pool exact,"10 artifact lands with explicit bounds",PASS,NOTE,false,
+INP-07,Frozen input,No nonland may change,"No nonland candidate variable",PASS,NOTE,false,
+INP-08,Frozen input,Material frozen rules facts present,"Machine-readable rules packet",PASS,NOTE,false,Web not required
+CAND-01,Candidate generation,Every candidate has 19 lands,"Independent recursive enumeration",PASS,NOTE,false,
+CAND-02,Candidate generation,Only permitted identities,"Set generated from exact pool",PASS,NOTE,false,
+CAND-03,Candidate generation,Copy bounds respected,"Recursive and production set equality",PASS,NOTE,false,
+CAND-04,Candidate generation,No duplicates,"296706 unique canonical keys",PASS,NOTE,false,
+CAND-05,Candidate generation,C0 occurs exactly once,"Independent count 1",PASS,NOTE,false,
+CAND-06,Candidate generation,No legal candidate omitted,"Independent recursive set equals production set",PASS,NOTE,false,
+CAND-07,Candidate generation,Count verified by two independent methods,"Inclusion-exclusion and recursive both 296706",PASS,NOTE,false,
+CAND-08,Candidate generation,Enumeration order cannot affect RNG,"Seed derivation excludes iteration order; protected reverse-order smoke equal",PASS,NOTE,false,
+CAND-09,Candidate generation,Candidate identity hidden from policy,"Signatures/source scan and label test",PASS,NOTE,false,
+REG-01,Regression,Full suite fresh extraction A,"179 passed",PASS,NOTE,false,
+REG-02,Regression,Full suite fresh extraction B,"179 passed",PASS,NOTE,false,
+REG-03,Regression,D-01 sensitive and passes,"Exact wrong-Bridge reproducer plus permutations",PASS,NOTE,false,
+REG-04,Regression,D-02 sensitive and passes,"Untapped mono versus Bridge",PASS,NOTE,false,
+REG-05,Regression,D-03 sensitive and passes,"Known continuation through information nodes",PASS,NOTE,false,
+REG-06,Regression,D-04 sensitive and passes,"Land-loss and deadline fixtures",PASS,NOTE,false,
+REG-07,Regression,D-05 sensitive and passes,"Nihil/Cryogen/Bargain trigger composition",PASS,NOTE,false,
+REG-08,Regression,D-06 sensitive and passes,"Raw versus functional Hawk",PASS,NOTE,false,
+REG-09,Regression,D-07 sensitive and passes,"Pairwise precedence conflicts",PASS,NOTE,false,Does not cure config drift
+REG-10,Regression,D-08 sensitive and passes,"Opportunity identity and denominator reconstruction",PASS,NOTE,false,
+REG-11,Regression,D-09 sensitive and passes,"Boulder used versus required",PASS,NOTE,false,
+REG-12,Regression,D-10 sensitive and passes,"Key mismatch rejection and closed form",PASS,NOTE,false,
+REG-13,Regression,D-11 sensitive and passes,"Nihil production trace and validation-only flags",PASS,NOTE,false,
+INFO-01,Information boundary,Mulligan keep ignores hidden future,"Metamorphic tests",PASS,NOTE,false,
+INFO-02,Information boundary,Bottoming ignores hidden future,"Metamorphic tests",PASS,NOTE,false,
+INFO-03,Information boundary,Land/action root ignores hidden future,"Metamorphic tests",PASS,NOTE,false,
+INFO-04,Information boundary,Payment/Hawk/Bargain choices ignore hidden future,"Metamorphic tests",PASS,NOTE,false,
+INFO-05,Information boundary,Boulder pre-scry ignores unknown third card,"Metamorphic tests",PASS,NOTE,false,
+INFO-06,Information boundary,Post-reveal replanning permitted,"Causal tests",PASS,NOTE,false,
+PLAN-01,Planner,Payment enumerates distinct resource states,"Payment/permutation tests",PASS,NOTE,false,
+PLAN-02,Planner,Mana conservation and colors,"Unit tests",PASS,NOTE,false,
+PLAN-03,Planner,Affinity/Metalcraft transitions,"Unit tests",PASS,NOTE,false,
+PLAN-04,Planner,Hawk/Bargain ordering and resource loss,"Unit tests",PASS,NOTE,false,
+PLAN-05,Planner,Depth 7/8/9 stable on audited corpus,"16 states zero root divergences",PASS,NOTE,false,Local result only
+PLAN-06,Planner,Depth corpus covers ranking-relevant structures,"12 ordinary plus 4 targeted; required combinations missing",FAIL,MAJOR,true,F-07
+PLAN-07,Planner,Planner depth/bounds frozen in experiment config,"Hard-coded defaults depth 8 and 12 actions",PARTIAL,MAJOR,true,F-07
+POL-01,Policy,Policies depend on state not candidate identity,"Source/signature/permutation tests",PASS,NOTE,false,
+POL-02,Policy,Baseline policy authoritative and consistent,"Deck YAML precedence differs from Run E code/spec",FAIL,BLOCKER,true,F-05
+POL-03,Policy,Alternate tempo policy executable,"Alternate tuple executes",PASS,NOTE,false,
+POL-04,Policy,Alternate tap-out reserve policy executable,"Protected tie selects reserve",FAIL,BLOCKER,true,F-05
+POL-05,Policy,Baseline and alternate scry executable,"Tests",PASS,NOTE,false,
+MUL-01,Mulligan,London redraw/count mechanics correct,"Unit tests",PASS,NOTE,false,
+MUL-02,Mulligan,Bottom exact and deterministic,"Unit tests",PASS,NOTE,false,
+MUL-03,Mulligan,Baseline policy coherent,"Unit and no-lookahead tests",PASS,NOTE,false,
+MUL-04,Mulligan,Alternate policy available,"Unit tests",PASS,NOTE,false,
+MET-01,Metrics,Raw event registry has precise contracts,"29 entries validate required metadata",PASS,NOTE,false,
+MET-02,Metrics,Production emits event-level traces,"Protected trial has 362 events",PASS,NOTE,false,
+MET-03,Metrics,Production aggregation enforces registry contracts,"Only smoke aggregator exists",FAIL,BLOCKER,true,F-03
+MET-04,Metrics,Critical sequences executable,"Prose predicates only",FAIL,BLOCKER,true,F-03
+MET-05,Metrics,Spell/turn output schemas implemented,"No Phase 3 output schemas",FAIL,BLOCKER,true,F-03
+OBJ-01,Objectives,Raw metrics independent of score,"No master score; raw traces preserved",PASS,NOTE,false,
+OBJ-02,Objectives,Every production component precisely defined,"Component registry has events/families but no transforms/weights",PARTIAL,BLOCKER,true,F-02
+OBJ-03,Objectives,Leave-one-component-out executable,"Dictionary omission helper only",PARTIAL,BLOCKER,true,F-02
+OBJ-04,Objectives,De-correlated variants substantively defined,"First component per family only",FAIL,BLOCKER,true,F-02
+OBJ-05,Objectives,Balanced profile frozen,"Name only",FAIL,BLOCKER,true,F-02
+OBJ-06,Objectives,Tempo-sensitive profile frozen,"Name only",FAIL,BLOCKER,true,F-02
+OBJ-07,Objectives,Color-consistency profile frozen,"Name only",FAIL,BLOCKER,true,F-02
+OBJ-08,Objectives,Interaction-sensitive profile frozen,"Name only",FAIL,BLOCKER,true,F-02
+OBJ-09,Objectives,Double-spell-sensitive profile frozen,"Name only",FAIL,BLOCKER,true,F-02
+OBJ-10,Objectives,Profiles predeclared before results,"Names predeclared; exact definitions absent",PARTIAL,BLOCKER,true,F-02
+INT-01,Opponent interaction,No unsupported opponent-action probability,"Raw availability only",PASS,NOTE,false,
+INT-02,Opponent interaction,Availability/reservation/spend distinguished,"Events include before after spend and failure reason",PASS,NOTE,false,
+INT-03,Opponent interaction,Subjective demand sensitivity frozen,"Tap-out absent and interaction profile undefined",FAIL,BLOCKER,true,F-02/F-05
+SCR-01,Screening,C0 retained at every serious stage,"Declarative flag only; no stage",PARTIAL,BLOCKER,true,F-01
+SCR-02,Screening,Boundary classes protected,"56 candidates named only in prose",PARTIAL,BLOCKER,true,F-01
+SCR-03,Screening,No tiny noisy irreversible elimination,"No screening algorithm",FAIL,BLOCKER,true,F-01
+SCR-04,Screening,Shortlist rule documented,"Absent",FAIL,BLOCKER,true,F-01
+SCR-05,Screening,False-elimination risk controlled,"Absent",FAIL,BLOCKER,true,F-01
+SCR-06,Screening,Exact prefilters mathematically safe,"No Phase 3 prefilters",NOT_APPLICABLE,NOTE,false,Must audit if added
+RNG-01,RNG,Seeds documented,"Selection validation and four replicate seeds",PASS,NOTE,false,
+RNG-02,RNG,Scenario/trial determines randomness,"SHA-256 scenario trial attempt plus base seed",PASS,NOTE,false,
+RNG-03,RNG,Candidate order excluded,"Protected reverse-order smoke equal",PASS,NOTE,false,
+RNG-04,RNG,Candidate label excluded,"Protected label-renamed trial equal",PASS,NOTE,false,
+RNG-05,RNG,Play/draw pairing explicit,"Pairing key includes on_play",PASS,NOTE,false,
+RNG-06,RNG,Mulligan attempts paired coherently,"Attempt enters stable seed derivation",PASS,NOTE,false,
+RNG-07,RNG,Normal reversed shuffled Phase 3 orders invariant,"Only protected reverse order and label tests; no Phase 3 orchestrator",PARTIAL,MAJOR,true,F-01
+VAL-01,Selection validation,Selection/validation seed labels distinct,"Numeric uniqueness check",PASS,NOTE,false,
+VAL-02,Selection validation,Program enforces stage separation,"No selection/finalist pipeline",FAIL,BLOCKER,true,F-01
+VAL-03,Selection validation,Validation cannot tune profiles,"Profiles and pipeline absent",FAIL,BLOCKER,true,F-01/F-02
+MC-01,Multiple comparisons,Winner's curse explicitly recognized,"Documentation",PASS,NOTE,false,
+MC-02,Multiple comparisons,Selected leaders re-evaluated fresh,"No pipeline",FAIL,BLOCKER,true,F-01
+MC-03,Multiple comparisons,Close finalists get adaptive precision,"No rule",FAIL,BLOCKER,true,F-01
+MC-04,Multiple comparisons,Paired uncertainty for finalist differences,"Primitive exists; no orchestration",PARTIAL,BLOCKER,true,F-01
+PREC-01,Precision,Screening trial count frozen,"0",FAIL,BLOCKER,true,F-01
+PREC-02,Precision,Medium trial count frozen,"0",FAIL,BLOCKER,true,F-01
+PREC-03,Precision,Validation trial/adaptive rule frozen,"0 and absent",FAIL,BLOCKER,true,F-01
+PREC-04,Precision,Stopping rules predeclared,"Absent",FAIL,BLOCKER,true,F-01
+PAR-01,Pareto,Metric direction respected,"Higher-only helper",FAIL,BLOCKER,true,F-04
+PAR-02,Pareto,Missing values handled,"No handling",FAIL,BLOCKER,true,F-04
+PAR-03,Pareto,Tolerance/materiality handled,"No handling",FAIL,BLOCKER,true,F-04
+PAR-04,Pareto,Uncertainty handled,"No handling",FAIL,BLOCKER,true,F-04
+REGRET-01,Regret,Profile gaps reported,"Simple helper only",PARTIAL,BLOCKER,true,F-04
+REGRET-02,Regret,Paired uncertainty attached,"Absent",FAIL,BLOCKER,true,F-04
+FRONT-01,Frontier,Smallest defensible frontier supported,"No frontier pipeline; output disabled",FAIL,BLOCKER,true,F-01/F-04
+FRONT-02,Frontier,All three eventual decision labels supported,"Documentation only",PARTIAL,BLOCKER,true,F-01/F-04
+MODEL-01,Model risk,No arbitrary tapland scalar,"Actual ETB/resource events",PASS,NOTE,false,
+MODEL-02,Model risk,Overlap cannot silently define winner,"Warnings only; profiles absent",PARTIAL,BLOCKER,true,F-02
+MODEL-03,Model risk,No free fixing,"Boulder net-zero and tested",PASS,NOTE,false,
+MODEL-04,Model risk,No match-win inference,"Explicitly prohibited",PASS,NOTE,false,
+UNSUP-01,Unsupported mechanics,Blood activation contained,"Validation only; no sensitivity",FAIL,BLOCKER,true,F-06
+UNSUP-02,Unsupported mechanics,Munitions activation contained,"Validation only; no sensitivity",FAIL,BLOCKER,true,F-06
+UNSUP-03,Unsupported mechanics,Cryogen stun contained,"Validation only; no sensitivity",FAIL,BLOCKER,true,F-06
+UNSUP-04,Unsupported mechanics,Blood recursion contained,"Absent",FAIL,BLOCKER,true,F-06
+UNSUP-05,Unsupported mechanics,Opponent removal/indestructibility contained,"Goldfish only; no sensitivity",FAIL,BLOCKER,true,F-06
+UNSUP-06,Unsupported mechanics,Familiar opponent-dependent draw contained,"Disabled; no sensitivity",PARTIAL,MAJOR,true,F-06
+REPRO-01,Reproducibility,Same config/seed protected workload repeats,"Label-renamed 362-event trace identical",PASS,NOTE,false,
+REPRO-02,Reproducibility,Exact code version recoverable,"ZIP hash exact but Git commit unavailable",PARTIAL,MAJOR,true,F-08
+REPRO-03,Reproducibility,Exact Phase 3 command exists,"Absent",FAIL,BLOCKER,true,F-01
+REPRO-04,Reproducibility,Phase 3 output paths/schemas defined,"Absent",FAIL,BLOCKER,true,F-01/F-03
+FREEZE-01,Config freeze,Production scenarios and weights frozen,"Conflicting all-play/all-draw/mixed versus smoke mixed and deck 50/50",FAIL,BLOCKER,true,F-01
+FREEZE-02,Config freeze,Planner bounds frozen,"Hard-coded not config",PARTIAL,MAJOR,true,F-07
+FREEZE-03,Config freeze,Practical-significance rule frozen,"Absent",FAIL,BLOCKER,true,F-01/F-02
+FREEZE-04,Config freeze,Robustness matrix frozen,"Names only and output false",FAIL,BLOCKER,true,F-01/F-06
+DRY-01,Dry run,Synthetic candidates traverse complete Phase 3 pipeline,"No pipeline",FAIL,BLOCKER,true,F-01
+DRY-02,Dry run,Fresh validation switch verified,"No pipeline",FAIL,BLOCKER,true,F-01
+DRY-03,Dry run,Pareto/frontier report generated,"No pipeline and unsafe helper",FAIL,BLOCKER,true,F-04
+STOP-01,Scope,No real candidate performance screen run,"Audit-only deterministic/protected work",PASS,NOTE,false,
+STOP-02,Scope,No candidate ranked/eliminated/recommended,"No performance interpretation",PASS,NOTE,false,

@@ -1,0 +1,21 @@
+{
+  "artifact_content_hash": "db029a7ae0c04110160ad86bfab5868d129337879bc64551dcaaf322296e54ad",
+  "attestation": "NO REAL CANDIDATE PERFORMANCE EVALUATED; NO RANKING; NO RECOMMENDATION",
+  "config_hash": "e18e2feb8f1861e4b9c8263fb051a19a380c7236a102003ea039703c4825354e",
+  "fixture_scope": "synthetic_noncompetitive",
+  "mode": "READINESS_DRY_RUN",
+  "output_schema_fields": [
+    "candidate_id",
+    "config_hash",
+    "metric",
+    "policy_hash",
+    "scenario_id",
+    "seed_partition",
+    "value"
+  ],
+  "ranking_produced": false,
+  "recommendation_produced": false,
+  "stage": "09_report",
+  "status": "PASS",
+  "upstream_hash": "80ac97f3f36edf042c27e509f268a9fcb062476d43f1fbf5e5ad131dbc21f493"
+}

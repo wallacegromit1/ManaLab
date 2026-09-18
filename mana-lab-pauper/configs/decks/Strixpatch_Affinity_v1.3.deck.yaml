@@ -1,0 +1,400 @@
+schema_version: "pauper-v1"
+
+metadata:
+  frozen_at: "2026-09-17"
+  phase: "design_freeze"
+  authority_input: "benchmarks/90_STRIXPATCH_AFFINITY_V1.3_INPUT.md"
+  authority_input_sha256: "c67512aa289778daee1c872c505a9ddc000ba053c6ca157342fae773e1e0f93b"
+  legality_scope: "tabletop_pauper"
+  legality_note: >-
+    Baleful Strix and Dispatch are tabletop-Pauper legal effective 2026-09-07.
+    They are not available on Magic Online until the 2026-09-23 update; do not
+    mix pre-2026-09-23 MTGO results with the exact frozen post-Zeta benchmark.
+
+deck:
+  name: "Strixpatch Affinity"
+  version: "v1.3"
+  format: "Pauper"
+  maindeck_size: 60
+  sideboard_scope: false
+
+optimization:
+  target: "mana_base"
+  frozen_nonlands: true
+  current_base_label: "C0"
+  total_land_count:
+    mode: "exact"
+    value: 19
+  target_turn_horizon: 4
+
+cards:
+  maindeck:
+    - name: "Baleful Strix"
+      copies: 3
+      mana_cost: "{U}{B}"
+      mana_relevant_tags: [artifact, creature, joint_color_UB, etb_draw]
+      rules_model:
+        colored_cost: {U: 1, B: 1}
+        etb_draw: 1
+        artifact_on_battlefield: true
+      timing: "own_turn"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.45, 3: 0.40, 4: 0.15}
+        value_development: {2: 0.25, 3: 0.45, 4: 0.30}
+      timing_assumption: "SUBJECTIVE; test both named profiles."
+
+    - name: "Blood Fountain"
+      copies: 1
+      mana_cost: "{B}"
+      mana_relevant_tags: [artifact, etb_token, blood_token, artifact_count]
+      rules_model:
+        colored_cost: {B: 1}
+        etb_create_blood_token: 1
+        blood_token_is_artifact: true
+        blood_token_activation: {generic_mana: 1, tap: true, discard_cards: 1, sacrifice_self: true, draw: 1}
+        late_recursion_activation: {generic_mana: 3, B: 1, tap: true, sacrifice_self: true}
+      timing: "own_turn"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.45, 2: 0.35, 3: 0.15, 4: 0.05}
+      timing_assumption: "SUBJECTIVE; early artifact development is the modeled reason, not an empirical cast-rate claim."
+
+    - name: "Cryogen Relic"
+      copies: 4
+      mana_cost: "{1}{U}"
+      mana_relevant_tags: [artifact, etb_draw, ltb_draw, sacrifice, glint_hawk_synergy]
+      rules_model:
+        generic_cost: 1
+        colored_cost: {U: 1}
+        etb_draw: 1
+        leaves_battlefield_draw: 1
+        activated_stun: {generic_mana: 1, U: 1, sacrifice_self: true, target_requires_tapped_creature: true}
+      timing: "own_turn_primary; either_turn_option_for_activation"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.55, 3: 0.35, 4: 0.10}
+        value_development: {2: 0.40, 3: 0.40, 4: 0.20}
+      timing_assumption: "SUBJECTIVE; leave-trigger/Hawk value is decision-relevant and must be executed, not scored as a bonus."
+
+    - name: "Dispatch"
+      copies: 3
+      mana_cost: "{W}"
+      mana_relevant_tags: [instant, interaction, metalcraft, opponent_turn]
+      rules_model:
+        colored_cost: {W: 1}
+        base_effect: "tap_target_creature"
+        full_effect_condition: {artifact_count_at_resolution_gte: 3}
+        full_effect: "exile_target_creature"
+      timing: "either_turn"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.10, 2: 0.35, 3: 0.35, 4: 0.20}
+        interaction_frontloaded: {1: 0.20, 2: 0.45, 3: 0.25, 4: 0.10}
+      timing_assumption: "SUBJECTIVE; report raw W castability separately from Metalcraft full-effect availability."
+
+    - name: "Galvanic Blast"
+      copies: 4
+      mana_cost: "{R}"
+      mana_relevant_tags: [instant, interaction, metalcraft, opponent_turn]
+      rules_model:
+        colored_cost: {R: 1}
+        base_damage: 2
+        full_effect_condition: {artifact_count_at_resolution_gte: 3}
+        full_effect_damage: 4
+      timing: "either_turn"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.25, 2: 0.35, 3: 0.25, 4: 0.15}
+        interaction_frontloaded: {1: 0.40, 2: 0.35, 3: 0.15, 4: 0.10}
+      timing_assumption: "SUBJECTIVE; full-effect availability is distinct from red-source access."
+
+    - name: "Giant's Boulder"
+      copies: 4
+      mana_cost: "{1}"
+      mana_relevant_tags: [artifact, fixing, filter, tap_resource, scry_2]
+      rules_model:
+        generic_cost: 1
+        etb_scry: 2
+        filter_activation: {generic_mana: 1, tap_self: true, output: "one_mana_any_color"}
+        filter_is_ramp: false
+        late_destroy_activation: {generic_mana: 7, tap_self: true, sacrifice_self: true, target: "permanent"}
+        summoning_sickness_blocks_tap_ability: false
+      timing: "own_turn_setup"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.65, 2: 0.25, 3: 0.08, 4: 0.02}
+        value_development: {1: 0.50, 2: 0.30, 3: 0.15, 4: 0.05}
+      timing_assumption: "SUBJECTIVE; external 4C Affinity evidence supports early fixing importance, not these exact timing masses."
+
+    - name: "Glint Hawk"
+      copies: 4
+      mana_cost: "{W}"
+      mana_relevant_tags: [creature, artifact_return, land_return_possible, cryogen_retrigger, boulder_retrigger]
+      rules_model:
+        colored_cost: {W: 1}
+        etb_requirement: "sacrifice_hawk_unless_return_artifact_you_control_to_hand"
+        valid_return_types: [artifact_land, artifact_permanent]
+        return_is_cost: false
+      timing: "own_turn"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.05, 2: 0.45, 3: 0.35, 4: 0.15}
+        hawk_tempo: {1: 0.15, 2: 0.55, 3: 0.25, 4: 0.05}
+      timing_assumption: "SUBJECTIVE; T1 Hawk is legal via returning an artifact land but carries large development cost."
+
+    - name: "Makeshift Munitions"
+      copies: 1
+      mana_cost: "{1}{R}"
+      mana_relevant_tags: [enchantment, sacrifice_outlet, activated_mana_cost, either_turn_option]
+      rules_model:
+        generic_cost: 1
+        colored_cost: {R: 1}
+        activation: {generic_mana: 1, sacrifice_artifact_or_creature: 1}
+      timing: "own_turn_deployment; either_turn_activation"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.10, 3: 0.35, 4: 0.55}
+      timing_assumption: "SUBJECTIVE; activation is option-availability unless a target fixture is supplied."
+
+    - name: "Myr Enforcer"
+      copies: 4
+      mana_cost: "{7}"
+      mana_relevant_tags: [artifact, creature, affinity]
+      rules_model:
+        generic_cost: 7
+        affinity_for_artifacts: true
+        colored_floor: 0
+      timing: "own_turn"
+      earliest_realistic_turn: 3
+      desired_windows:
+        baseline_practical: {3: 0.55, 4: 0.45}
+      timing_assumption: "T2 is excluded as a realistic benchmark window for this exact frozen shell; Work must test the impossibility fixture."
+
+    - name: "Nihil Spellbomb"
+      copies: 1
+      mana_cost: "{1}"
+      mana_relevant_tags: [artifact, sacrifice, optional_black_draw, opponent_turn_option]
+      rules_model:
+        generic_cost: 1
+        graveyard_exile_activation: {tap_self: true, sacrifice_self: true}
+        graveyard_to_grave_trigger: {optional_B_payment: 1, draw_if_paid: 1}
+        return_to_hand_triggers_draw: false
+      timing: "own_turn_deployment; either_turn_activation"
+      earliest_realistic_turn: 1
+      desired_windows:
+        baseline_practical: {1: 0.25, 2: 0.25, 3: 0.25, 4: 0.25}
+      timing_assumption: "Deployment timing is low-confidence and descriptive; optional B draw is tracked separately."
+
+    - name: "Reckoner's Bargain"
+      copies: 3
+      mana_cost: "{1}{B}"
+      mana_relevant_tags: [instant, draw, additional_cost, sacrifice, opponent_turn]
+      rules_model:
+        generic_cost: 1
+        colored_cost: {B: 1}
+        additional_cost: {sacrifice_artifact_or_creature: 1}
+        draw: 2
+        sacrifice_occurs_during_casting: true
+      timing: "either_turn"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.25, 3: 0.40, 4: 0.35}
+        value_development: {2: 0.15, 3: 0.40, 4: 0.45}
+      timing_assumption: "SUBJECTIVE; functional availability requires both payment and a legal sacrifice."
+
+    - name: "Refurbished Familiar"
+      copies: 4
+      mana_cost: "{3}{B}"
+      mana_relevant_tags: [artifact, creature, affinity, conditional_etb_draw]
+      rules_model:
+        generic_cost: 3
+        colored_cost: {B: 1}
+        affinity_for_artifacts: true
+        conditional_draw_if_opponent_cannot_discard: true
+        deterministic_draw_for_goldfish: false
+      timing: "own_turn"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.35, 3: 0.45, 4: 0.20}
+      timing_assumption: "SUBJECTIVE; opponent-hand-dependent draw is not assumed in baseline goldfish state."
+
+    - name: "Thoughtcast"
+      copies: 4
+      mana_cost: "{4}{U}"
+      mana_relevant_tags: [sorcery, affinity, draw]
+      rules_model:
+        generic_cost: 4
+        colored_cost: {U: 1}
+        affinity_for_artifacts: true
+        draw: 2
+      timing: "own_turn"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.35, 3: 0.45, 4: 0.20}
+        value_development: {2: 0.25, 3: 0.45, 4: 0.30}
+      timing_assumption: "SUBJECTIVE; draws must change actual library/hand state."
+
+    - name: "Utrom Monitor"
+      copies: 1
+      mana_cost: "{4}{U}"
+      mana_relevant_tags: [artifact, creature, affinity]
+      rules_model:
+        generic_cost: 4
+        colored_cost: {U: 1}
+        affinity_for_artifacts: true
+      timing: "own_turn"
+      earliest_realistic_turn: 2
+      desired_windows:
+        baseline_practical: {2: 0.20, 3: 0.45, 4: 0.35}
+      timing_assumption: "SUBJECTIVE; current Oracle verified from Wizards release notes."
+
+candidate_pool:
+  lands:
+    - {name: "Ancient Den", min_copies: 1, max_copies: 4, colors: [W], artifact: true, enters_tapped: false}
+    - {name: "Seat of the Synod", min_copies: 1, max_copies: 4, colors: [U], artifact: true, enters_tapped: false}
+    - {name: "Vault of Whispers", min_copies: 1, max_copies: 4, colors: [B], artifact: true, enters_tapped: false}
+    - {name: "Great Furnace", min_copies: 1, max_copies: 4, colors: [R], artifact: true, enters_tapped: false}
+    - {name: "Razortide Bridge", min_copies: 0, max_copies: 4, colors: [W, U], artifact: true, enters_tapped: true, indestructible: true}
+    - {name: "Goldmire Bridge", min_copies: 0, max_copies: 4, colors: [W, B], artifact: true, enters_tapped: true, indestructible: true}
+    - {name: "Rustvale Bridge", min_copies: 0, max_copies: 4, colors: [W, R], artifact: true, enters_tapped: true, indestructible: true}
+    - {name: "Mistvault Bridge", min_copies: 0, max_copies: 4, colors: [U, B], artifact: true, enters_tapped: true, indestructible: true}
+    - {name: "Silverbluff Bridge", min_copies: 0, max_copies: 4, colors: [U, R], artifact: true, enters_tapped: true, indestructible: true}
+    - {name: "Drossforge Bridge", min_copies: 0, max_copies: 4, colors: [B, R], artifact: true, enters_tapped: true, indestructible: true}
+  nonland_fixing:
+    - name: "Giant's Boulder"
+      copies: 4
+      fixed: true
+      filter_cost: "{1}, {T}"
+      filter_output: "one mana of any color"
+      net_mana_gain: 0
+
+current_mana_base:
+  - {name: "Ancient Den", copies: 3}
+  - {name: "Goldmire Bridge", copies: 1}
+  - {name: "Great Furnace", copies: 4}
+  - {name: "Mistvault Bridge", copies: 2}
+  - {name: "Razortide Bridge", copies: 1}
+  - {name: "Seat of the Synod", copies: 4}
+  - {name: "Vault of Whispers", copies: 4}
+
+mechanics_required:
+  - artifact_lands
+  - etb_tapped_lands
+  - explicit_colored_and_generic_payment
+  - giant_boulder_scry_2
+  - giant_boulder_filtering_and_tap_state
+  - artifact_count
+  - affinity_for_artifacts
+  - metalcraft
+  - etb_draw
+  - leaves_battlefield_draw
+  - triggered_ability_queue_minimal
+  - artifact_return_to_hand
+  - additional_cost_sacrifice
+  - sacrifice_resource_loss
+  - token_creation_and_blood_token
+  - draw_order_state_updates
+  - opponent_turn_resource_availability
+  - same_turn_multi_spell
+  - london_mulligan_and_bottoming
+  - play_draw_difference
+
+policies:
+  sequencing_profiles:
+    - "baseline_hand_demand"
+    - "alternate_tempo_untapped"
+  mulligan_profiles:
+    - "baseline_functional_london"
+    - "alternate_landcount_london"
+  play_draw_mix:
+    play: 0.5
+    draw: 0.5
+
+policy_contract:
+  information_boundary: "known hand + public battlefield + legally revealed scry cards + frozen deck knowledge only; never unseen future library order"
+  land_baseline: >-
+    Enumerate legal land plays; lexicographically maximize due-current-turn functional actions,
+    preserve one opponent-turn interaction option when baseline reserve applies, maximize current
+    usable mana, then known-hand color coverage; play a Bridge in a slack window when this tuple is unchanged.
+  land_alternate: >-
+    Enumerate legal land plays; maximize current untapped mana first, then due-current-turn actions,
+    then known-hand color coverage. Same deterministic tie-break order for every candidate.
+  action_baseline: >-
+    Enumerate legal own-main action sequences from the visible state. Maximize due/overdue proactive
+    spell executions, then end-of-main artifact count, then cards drawn/legally selected, then remaining
+    untapped resources after preserving the baseline interaction reserve; minimize irreversible land loss.
+    Interaction spells are not auto-cast without a target fixture.
+  action_alternate: >-
+    Tempo-first: maximize number of own-turn spell executions and current untapped-mana use before
+    preserving interaction; otherwise uses identical legal-action generation and tie-breaks.
+  opponent_reserve_baseline: >-
+    Do not pre-float mana. If at least one held interactive spell has a current opponent-window demand,
+    preserve untapped permanents sufficient for one legal option whenever doing so does not miss a hard
+    current-turn proactive deadline. Select the option with minimum mana opportunity cost; report all
+    other options counterfactually.
+  opponent_reserve_alternate: "tap_out_development; reserve nothing solely for opponent turn, but still report opponent-window option availability"
+  boulder_scry_baseline: >-
+    Evaluate only the two legally revealed cards. Keep/order cards that solve a visible next-land-drop or
+    due-color need first, then due-by-next-turn castable spells, then other in-horizon cards. Bottom cards
+    with zero need score. Never inspect the unknown card below the scry pair.
+  boulder_scry_alternate: >-
+    Land-stability variant: among the two revealed cards prioritize a needed next land drop/color source,
+    then in-window draw/development cards, then other in-horizon spells. Same no-lookahead boundary.
+  mulligan_baseline: >-
+    London mulligan. At 7/6/5-card final sizes, keep a drawn seven only if it contains 2-4 lands and,
+    using visible cards only, a legal T1-T2 land sequence can provide two usable mana in a T2 main phase.
+    If not, mulligan. At final size 4, keep automatically. After keeping, bottom exactly the mulligan count
+    by exhaustive subset selection using the frozen lexicographic bottom rule.
+  mulligan_alternate: >-
+    London land-count stress test. At final sizes 7/6/5 keep any drawn seven containing 2-5 lands;
+    otherwise mulligan. At final size 4 keep automatically. Use the same bottom rule.
+  bottom_rule: >-
+    Enumerate all required bottom subsets and keep the subset that lexicographically minimizes distance
+    from target retained land count (6->2-3, 5->2, 4->1-2), maximizes visible T1-T2 usable mana, maximizes
+    color coverage for kept spells due by T3, maximizes retained early-window actions, then uses canonical
+    card-name tie breaks. No future library inspection.
+
+# These are not scalar weights. They are named metric views evaluated from preserved raw events.
+decision_profiles:
+  - balanced
+  - tempo_sensitive
+  - color_consistency
+  - interaction_sensitive
+  - double_spell_sensitive
+  - affinity_value_engine
+
+external_evidence:
+  use: "assumption calibration and regression only; never override benchmark constraints or prove optimality"
+  items:
+    - id: "realtime_4c_boulder_reddit_2026-08-25"
+      attribution: "User requested Junkdog evidence; indexed post author is Visual-Lawyer7861. Identity linkage to MTGGoldfish user Junkdog is NOT independently verified."
+      facts_used:
+        - "4C Affinity brewer reports Boulder as essential fixing while using only four tapped lands."
+        - "Brewer explicitly values Cryogen Relic because Glint Hawk returning it triggers the leave-battlefield draw."
+        - "Self-reported results are not used as objective weights or causal evidence."
+      linked_deck_ids: [7925924, 7924586, 7928016]
+    - id: "mtggoldfish_junkdog_history"
+      facts_used:
+        - "MTGGoldfish independently shows user Junkdog as a Pauper deck author and a 2025 Izzet Cryogen Relic list."
+        - "This does not prove identity with the Reddit brewer or establish the exact 2026 4C list contents."
+    - id: "mymtgo_4c_affinity_boulder"
+      facts_used:
+        - "Recent MTGO tracker data records Giant's Boulder in 4C Affinity; sample is small and observational."
+        - "No win-rate statistic from this source is used to calibrate simulator utility."
+
+card_fact_sources:
+  - {id: "wotc_zeta_pauper_2026-09-04", url: "https://magic.wizards.com/en/news/announcements/on-the-zeta-set-in-pauper", scope: "Baleful Strix/Dispatch tabletop legality and MTGO timing"}
+  - {id: "boulder_current_card_data", url: "https://mtg.wtf/card/hob/173/Giants-Boulder", scope: "Giant's Boulder cost, scry/filter/sacrifice semantics, Pauper legality"}
+  - {id: "cryogen_current_card_data", url: "https://mtg.wtf/card/eoe/52/Cryogen-Relic", scope: "Cryogen Relic enter/leave draw, activated sacrifice, Pauper legality"}
+  - {id: "wotc_tmnt_release_notes", url: "https://media.wizards.com/2026/downloads/TMT_Release_Notes_eM8Yplm3UV/u17aHk8iV1_EN_MTGTMT_ReleaseNotes_20251001.pdf", scope: "Utrom Monitor exact cost, affinity, flying, cost-reduction ruling"}
+  - {id: "blood_token_rules", url: "https://magic.wizards.com/en/news/feature/innistrad-crimson-vow-mechanics-2021-10-28", scope: "Blood token artifact status and activation"}
+  - {id: "realworld_4c_boulder", url: "https://www.reddit.com/r/Pauper/comments/1vxkmza/giants_boulder_brings_us_4color_affinity_78_win/", scope: "4C Boulder/Cryogen/Hawk qualitative sequencing evidence"}
+  - {id: "mymtgo_boulder_4c", url: "https://mymtgo.com/cards/pauper/giants-boulder?deck=4c-affinity", scope: "recent observational 4C Affinity usage only"}
+
+notes:
+  - "Nonland count = 41; land count = 19; maindeck = 60."
+  - "C0 has 15 untapped artifact lands, 4 Bridges; direct sources W5/U7/B7/R4."
+  - "Legal candidate-space count is frozen deterministic target 296706; minimum Bridges = 3; three-Bridge candidates = 56."
+  - "No opaque master score is authorized by this deck spec."
+  - "No final optimization is authorized in Work Run A."
