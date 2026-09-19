@@ -183,10 +183,12 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
             and "Cryogen" in str(event.get("reason", event.get("source", "")))
             and 0 < int(event.get("turn", 0)) <= deadline
         ]
-        if source_uid is not None:
-            linked = [event for event in result if event.get("source_uid") == source_uid]
-            if linked:
-                return linked
+        if source_uid is not None and any(
+            event.get("source_uid") is not None for event in result
+        ):
+            # Once source-instance identity exists it is mandatory. An enter
+            # draw from another Relic must not satisfy this Relic's deadline.
+            return [event for event in result if event.get("source_uid") == source_uid]
         return result
     hawk_returns_by_t3 = [
         event for event in rows
@@ -200,12 +202,11 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
     }
     affinity_cards = {"Thoughtcast", "Myr Enforcer", "Refurbished Familiar", "Utrom Monitor"}
     draw_development = {"Baleful Strix", "Cryogen Relic", "Thoughtcast"}
-    t4_uids = {
-        str(event.get("uid")) if event.get("uid") is not None
-        else f"{event.get('card')}|event={event.get('event_id')}"
-        for event in functional
-        if int(event.get("turn", 0)) == 4
-    }
+    t4_executions = [
+        event for event in functional if int(event.get("turn", 0)) == 4
+    ]
+    # Spell executions, not distinct physical card identities: recasting one
+    # returned card twice is a legitimate same-turn double-spell line.
     return {
         "T2_STRIX_UB": resolved_by("Baleful Strix", 2),
         "T2_CRYOGEN": any(
@@ -237,7 +238,7 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
         ),
         "T3_DRAW_PLUS_INTERACTION": bool(t3_cards & draw_development) and interaction_by(3),
         "T3_AFFINITY_PLUS_INTERACTION": bool(t3_cards & affinity_cards) and interaction_by(3),
-        "T4_DOUBLE_SPELL": len(t4_uids) >= 2,
+        "T4_DOUBLE_SPELL": len(t4_executions) >= 2,
         "OPP_FULL_DISPATCH": interaction_by(4, "Dispatch", metalcraft=True),
         "OPP_FULL_BLAST": interaction_by(4, "Galvanic Blast", metalcraft=True),
     }
