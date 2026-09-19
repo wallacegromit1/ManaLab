@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
@@ -191,6 +192,16 @@ class Phase3Pipeline:
             for c in enumerate_candidates(deck)
         ]
         candidate_hash = canonical_hash(rows)
+        canonical_set_hash = hashlib.sha256(
+            "\n".join(sorted(row["candidate_id"] for row in rows)).encode("utf-8")
+        ).hexdigest()
+        expected_set_hash = str(
+            self.config["candidate_space"]["expected_canonical_set_sha256"]
+        )
+        if canonical_set_hash != expected_set_hash:
+            raise RuntimeError(
+                "canonical candidate-set SHA-256 does not match frozen authority"
+            )
         candidate_text = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
         if self._candidate_path().exists():
             self._validate_candidate_file(candidate_hash, len(rows))
@@ -210,6 +221,7 @@ class Phase3Pipeline:
             "candidate_count": len(rows),
             "candidate_payload": self._candidate_path().name,
             "candidate_payload_hash": candidate_hash,
+            "canonical_candidate_set_sha256": canonical_set_hash,
             "protected_candidate_ids": protected,
             "c0_occurrences": 1,
             "three_bridge_count": 56,
