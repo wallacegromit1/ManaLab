@@ -8,7 +8,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -16,18 +16,32 @@ jobs:
           python-version: '3.11'
       - name: Install dependencies
         run: python -m pip install --upgrade pip PyYAML
-      - name: Unit tests
+      - name: Verify frozen archive hashes
+        run: |
+          echo "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71  archives/Mana_Lab_Pauper_v1_Run_E.zip" | sha256sum -c -
+          echo "ca7f2ed96cfc0a19041304af4d29bdbb4bf9c9b3908d10f35ffadb0599813e9d  archives/Mana_Lab_Pauper_v1_Run_G.zip" | sha256sum -c -
+      - name: Untouched Run E regression (179)
+        run: |
+          rm -rf /tmp/run_e && mkdir /tmp/run_e
+          unzip -q archives/Mana_Lab_Pauper_v1_Run_E.zip -d /tmp/run_e
+          root="$(find /tmp/run_e -type d -name mana-lab-pauper | head -1)"
+          cd "$root"
+          PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v 2>&1 | tee /tmp/run_e_tests.txt
+          grep -Eq "Ran 179 tests" /tmp/run_e_tests.txt
+      - name: Untouched Run G regression (205)
+        run: |
+          rm -rf /tmp/run_g && mkdir /tmp/run_g
+          unzip -q archives/Mana_Lab_Pauper_v1_Run_G.zip -d /tmp/run_g
+          root="$(find /tmp/run_g -type d -name mana-lab-pauper | head -1)"
+          cd "$root"
+          PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v 2>&1 | tee /tmp/run_g_tests.txt
+          grep -Eq "Ran 205 tests" /tmp/run_g_tests.txt
+      - name: Run I working-tree tests
         working-directory: mana-lab-pauper
         env:
           PYTHONPATH: src
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -m unittest discover -s tests -v
-      - name: Run G readiness regression
-        working-directory: mana-lab-pauper
-        env:
-          PYTHONPATH: src
-          PYTHONDONTWRITEBYTECODE: '1'
-        run: python -m mana_lab.phase3_readiness --root . --config RUN_G_PHASE3_FROZEN_CONFIG.yaml --parent-zip ../archives/Mana_Lab_Pauper_v1_Run_E.zip
       - name: Candidate invariants
         working-directory: mana-lab-pauper
         env:
@@ -37,7 +51,9 @@ jobs:
           from mana_lab.cards import load_deck
           from mana_lab.candidates import candidate_count_report
           d=load_deck('configs/decks/Strixpatch_Affinity_v1.3.deck.yaml')
-          print(candidate_count_report(d))
+          r=candidate_count_report(d)
+          print(r)
+          assert r['enumeration_count']==296706
+          assert r['c0_occurrences']==1
+          assert r['three_bridge_candidates']==56
           PY
-      - name: Archive hashes
-        run: sha256sum archives/Mana_Lab_Pauper_v1_Run_E.zip archives/Mana_Lab_Pauper_v1_Run_G.zip
