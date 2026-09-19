@@ -17,7 +17,14 @@ class RNGCandidateNeutralityTests(unittest.TestCase):
         left.pop("candidate")
         right.pop("candidate")
         self.assertEqual(left, right)
-        self.assertEqual(left_events, right_events)
+        # Run H H-03 requires candidate identity on every production event.
+        # Candidate labels therefore differ as provenance, but must not alter
+        # any scientific event content or randomness.
+        self.assertEqual({event["candidate"] for event in left_events}, {"LEFT"})
+        self.assertEqual({event["candidate"] for event in right_events}, {"RIGHT"})
+        left_science = [{k: v for k, v in event.items() if k != "candidate"} for event in left_events]
+        right_science = [{k: v for k, v in event.items() if k != "candidate"} for event in right_events]
+        self.assertEqual(left_science, right_science)
 
 
 if __name__ == "__main__":
