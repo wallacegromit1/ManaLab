@@ -106,6 +106,27 @@ class RunIAcceptanceTests(unittest.TestCase):
         ]
         self.assertFalse(evaluate_critical_sequences(mixed)["T4_DOUBLE_SPELL"])
 
+    def test_same_instance_recast_counts_as_two_executions(self):
+        trace = [
+            ev(1, "spell_resolution", 4, card="Nihil Spellbomb", uid="same",
+               functional=True),
+            ev(2, "spell_resolution", 4, card="Nihil Spellbomb", uid="same",
+               functional=True),
+        ]
+        self.assertTrue(evaluate_critical_sequences(trace)["T4_DOUBLE_SPELL"])
+
+    def test_cryogen_draws_cannot_borrow_other_instance(self):
+        trace = [
+            ev(1, "spell_resolution", 2, card="Cryogen Relic", uid="cry-a",
+               functional=True),
+            ev(2, "draw", 2, reason="Cryogen Relic enter draw",
+               source_uid="cry-b"),
+        ]
+        self.assertFalse(evaluate_critical_sequences(trace)["T2_CRYOGEN"])
+        trace.append(ev(3, "draw", 2, reason="Cryogen Relic enter draw",
+                        source_uid="cry-a"))
+        self.assertTrue(evaluate_critical_sequences(trace)["T2_CRYOGEN"])
+
     def test_paired_keys_still_fail_closed(self):
         left = [TrialObservation("s", 1, 0, True, .5)]
         right = [TrialObservation("s", 1, 1, True, .5)]
