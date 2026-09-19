@@ -172,7 +172,7 @@ def planner_depth_audit(deck, depths: tuple[int, ...] = (7, 8, 9)) -> dict[str, 
 
     return {
         "depths": list(depths),
-        "acceptance_rule": "all six predeclared structural fixtures have identical selected roots at depths 7/8/9",
+        "acceptance_rule": "all seven structural fixtures have identical selected roots at depths 7/8/9 and a depth-3 truncation loses reachable sequence length relative to depth 10",
         "states_tested": len(rows),
         "required_structural_classes": sorted(REQUIRED_STRUCTURAL_CLASSES),
         "unstable_classes": failures,
