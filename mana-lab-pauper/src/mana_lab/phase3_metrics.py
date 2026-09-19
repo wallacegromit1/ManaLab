@@ -216,9 +216,24 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
         "T2_THOUGHTCAST": resolved_by("Thoughtcast", 2),
         "T2_FAMILIAR": resolved_by("Refurbished Familiar", 2),
         "T2_MONITOR": resolved_by("Utrom Monitor", 2),
-        "T3_CRYOGEN_HAWK_LOOP": (
-            resolved_by("Cryogen Relic", 3) and resolved_on("Glint Hawk", 3)
-            and bool(hawk_returns_by_t3) and len(cryogen_draws_by(3)) >= 2
+        "T3_CRYOGEN_HAWK_LOOP": any(
+            resolved_on("Glint Hawk", 3)
+            and any(
+                (
+                    returned.get("uid") in {None, cryogen.get("uid")}
+                    and 0 < int(returned.get("turn", 0)) <= 3
+                )
+                for returned in hawk_returns_by_t3
+            )
+            and len(
+                cryogen_draws_by(
+                    3,
+                    str(cryogen.get("uid")) if cryogen.get("uid") is not None else None,
+                )
+            ) >= 2
+            for cryogen in functional
+            if cryogen.get("card") == "Cryogen Relic"
+            and 0 < int(cryogen.get("turn", 0)) <= 3
         ),
         "T3_DRAW_PLUS_INTERACTION": bool(t3_cards & draw_development) and interaction_by(3),
         "T3_AFFINITY_PLUS_INTERACTION": bool(t3_cards & affinity_cards) and interaction_by(3),
@@ -309,7 +324,11 @@ PRODUCTION_IDENTITY_FIELDS = (
 )
 
 
-def validate_production_event_stream(events: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def validate_production_event_stream(
+    events: Iterable[Mapping[str, Any]],
+    *,
+    expected_turns: Iterable[int] | None = None,
+) -> list[dict[str, Any]]:
     rows = validate_event_stream(events)
     if not rows:
         raise ValueError("production event stream is empty")
@@ -321,6 +340,19 @@ def validate_production_event_stream(events: Iterable[Mapping[str, Any]]) -> lis
         identities.add(tuple(row[field] for field in PRODUCTION_IDENTITY_FIELDS))
     if len(identities) != 1:
         raise ValueError("production event stream mixes candidate/policy/scenario identity")
+    if expected_turns is not None:
+        expected = {int(turn) for turn in expected_turns}
+        observed = {
+            int(row.get("turn", 0))
+            for row in rows
+            if row.get("event") == "state_snapshot"
+            and row.get("event_role") == "primary_pre_spend_opportunity"
+        }
+        missing = expected - observed
+        if missing:
+            raise ValueError(
+                f"incomplete production trace missing primary turns: {sorted(missing)}"
+            )
     return rows
 
 
@@ -341,7 +373,7 @@ def build_candidate_trial_table(
 ) -> list[dict[str, Any]]:
     table: list[dict[str, Any]] = []
     for stream in trial_streams:
-        rows = validate_production_event_stream(stream)
+        rows = validate_production_event_stream(stream, expected_turns=(1, 2, 3, 4))
         aggregate = aggregate_trial_events(rows)
         identity = rows[0]
         table.append({
@@ -360,7 +392,7 @@ def build_spell_table(
 ) -> list[dict[str, Any]]:
     output: list[dict[str, Any]] = []
     for stream in trial_streams:
-        rows = validate_production_event_stream(stream)
+        rows = validate_production_event_stream(stream, expected_turns=(1, 2, 3, 4))
         identity = rows[0]
         for row in rows:
             if row.get("event") != "spell_window":
