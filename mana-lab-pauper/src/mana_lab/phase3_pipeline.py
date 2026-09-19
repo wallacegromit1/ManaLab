@@ -155,6 +155,18 @@ class Phase3Pipeline:
             raise RuntimeError(f"tampered prerequisite stage artifact: {stage}")
         if not isinstance(value.get("payload"), dict):
             raise RuntimeError(f"missing stage payload: {stage}")
+        if stage not in REQUIRED_STAGES:
+            raise RuntimeError(f"unknown prerequisite stage: {stage}")
+        index = REQUIRED_STAGES.index(stage)
+        if index:
+            predecessor = REQUIRED_STAGES[index - 1]
+            prior = self._read_prerequisite(predecessor)
+            if value.get("prerequisite_hash") != prior["artifact_content_hash"]:
+                raise RuntimeError(
+                    f"invalid dependency edge {predecessor} -> {stage}"
+                )
+        elif value.get("prerequisite_hash") is not None:
+            raise RuntimeError("root stage cannot assert forged prerequisite")
         return value
 
     def stage_01_validate(self) -> dict[str, Any]:
@@ -291,8 +303,24 @@ class Phase3Pipeline:
             str(payload["candidate_payload_hash"]), int(payload["candidate_count"])
         )
         protected = set(payload["protected_candidate_ids"])
-        if len([row for row in rows if row["bridge_count"] == 3]) != 56:
-            raise RuntimeError("three-Bridge protection set drift")
+        c0_counts = {
+            land.name: dict(
+                load_deck(self.root / self.config["input"]["deck_spec"]["path"]).current_mana_base
+            ).get(land.name, 0)
+            for land in load_deck(
+                self.root / self.config["input"]["deck_spec"]["path"]
+            ).lands
+        }
+        expected = {
+            row["candidate_id"] for row in rows
+            if row["bridge_count"] == 3 or row["counts"] == c0_counts
+        }
+        if (
+            len([row for row in rows if row["bridge_count"] == 3]) != 56
+            or len(expected) != 57
+            or protected != expected
+        ):
+            raise RuntimeError("protected candidate identity set drift")
         return rows, protected
 
     def stage_03_screen(self) -> dict[str, Any]:
@@ -384,10 +412,12 @@ class Phase3Pipeline:
         if protected is None:
             # walk back to stage 03, which establishes the protected set
             protected = self._read_prerequisite("03_screen")["payload"]["protected_candidate_ids"]
-        if len(protected) != 57:
-            raise RuntimeError(f"protected candidate set lost before {stage}")
+        if set(protected) != set(stage2_payload["protected_candidate_ids"]):
+            raise RuntimeError(f"protected candidate identity set lost before {stage}")
         payload = {
             "protected_candidate_ids": protected,
+            "candidate_payload_hash": stage2_payload["candidate_payload_hash"],
+            "all_candidate_identities_carried": stage2_payload["candidate_count"],
             "real_candidate_performance_screened": False,
             **dict(extra),
         }
