@@ -80,8 +80,14 @@ def _shuffled(base: list[PhysicalCard], seed: int) -> list[PhysicalCard]:
 
 
 def _stable_scenario_seed(base_seed: int, scenario: str, trial: int, attempt: int) -> int:
-    digest = hashlib.sha256(f"{scenario}|{trial}|{attempt}".encode()).digest()
-    return base_seed + int.from_bytes(digest[:8], "big")
+    """Frozen purpose/scenario/replicate/trial/mulligan-attempt derivation.
+
+    base_seed is the declared selection/validation/replicate seed identity.
+    Candidate label and iteration order are deliberately absent.
+    """
+    payload = f"mulligan_draw|{scenario}|{int(base_seed)}|{int(trial)}|{int(attempt)}"
+    digest = hashlib.sha256(payload.encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big")
 
 
 def _source_presence(hand: list[PhysicalCard], deck: DeckSpec, color: str) -> bool:
@@ -135,6 +141,7 @@ class PlannerAction:
     payment: PaymentPlan | None = None
     target_uid: str | None = None
     sacrifice_uid: str | None = None
+    discard_uid: str | None = None
     reveals_information: bool = False
     due: bool = False
     hard_deadline: bool = False
@@ -170,6 +177,27 @@ def generate_legal_actions(state: GameState, deck: DeckSpec, *, include_land_act
                 by_name.setdefault(card.name, card)
         for name, card in sorted(by_name.items()):
             actions.append(PlannerAction("land", f"Play {name}", ("land", name), card_uid=card.uid))
+
+    # Blood has no opponent-dependent target, so its activation is a real
+    # production planner option.  Hidden draw identity remains behind the same
+    # causal information boundary as spell draw effects.
+    bloods = _target_variants([
+        permanent for permanent in state.battlefield
+        if permanent.card.name == "Blood" and not permanent.tapped
+    ])
+    discard_by_name: dict[str, PhysicalCard] = {}
+    for discard in sorted(state.hand, key=lambda c: (c.name, c.uid)):
+        discard_by_name.setdefault(discard.name, discard)
+    blood_plans = enumerate_payment_plans(state, ManaCost(generic=1))
+    for blood_permanent in bloods:
+        for discard in discard_by_name.values():
+            for plan in blood_plans:
+                actions.append(PlannerAction(
+                    "blood_activation", "Activate Blood",
+                    ("activate", "Blood", plan.canonical_key, "discard", discard.name),
+                    payment=plan, target_uid=blood_permanent.card.uid,
+                    discard_uid=discard.uid, reveals_information=True,
+                ))
 
     by_name: dict[str, PhysicalCard] = {}
     for card in sorted(state.hand, key=lambda c: (c.name, c.uid)):
@@ -215,11 +243,21 @@ def generate_legal_actions(state: GameState, deck: DeckSpec, *, include_land_act
     return sorted(actions, key=lambda action: action.key)
 
 
-def _resolve_or_defer_draw(state: GameState, count: int, reason: str, reveal_information: bool) -> None:
+def _resolve_or_defer_draw(
+    state: GameState,
+    count: int,
+    reason: str,
+    reveal_information: bool,
+    *,
+    source_uid: str | None = None,
+) -> None:
     if reveal_information:
-        state.draw(count, reason=reason)
+        state.draw(count, reason=reason, source_uid=source_uid)
     else:
-        state.log("information_node", kind="draw", count=count, reason=reason)
+        state.log(
+            "information_node", kind="draw", count=count, reason=reason,
+            source_uid=source_uid,
+        )
 
 
 def _information_value(events: list[dict[str, Any]], policy_name: str) -> int:
@@ -255,7 +293,17 @@ def _resolve_simulator_stack(
         item = state.stack.pop()
         state.log("stack_resolve", label=item.label, kind=item.kind)
         if item.label == "Cryogen Relic leave draw":
-            _resolve_or_defer_draw(state, 1, item.label, reveal_information)
+            source_uid = next(
+                (
+                    event.get("uid") for event in reversed(state.events)
+                    if event.get("event") == "permanent_left"
+                    and event.get("card") == "Cryogen Relic"
+                ),
+                None,
+            )
+            _resolve_or_defer_draw(
+                state, 1, item.label, reveal_information, source_uid=source_uid
+            )
         elif item.label == "Nihil Spellbomb optional B draw":
             plan = find_payment_plan(state, ManaCost(colored={"B": 1}))
             state.log(
@@ -268,10 +316,29 @@ def _resolve_simulator_stack(
                 state.log("nihil_draw_declined", reason="black_mana_unavailable")
             else:
                 execute_payment(state, plan)
-                _resolve_or_defer_draw(state, 1, "Nihil Spellbomb", reveal_information)
+                source_uid = next(
+                    (
+                        event.get("uid") for event in reversed(state.events)
+                        if event.get("event") == "permanent_left"
+                        and event.get("card") == "Nihil Spellbomb"
+                    ),
+                    None,
+                )
+                _resolve_or_defer_draw(
+                    state, 1, "Nihil Spellbomb", reveal_information, source_uid=source_uid
+                )
                 state.log("nihil_draw_paid", event_role="option_execution")
         elif item.label == "Reckoner's Bargain":
-            _resolve_or_defer_draw(state, 2, item.label, reveal_information)
+            source_uid = next(
+                (
+                    event.get("spell_uid") for event in reversed(state.events)
+                    if event.get("event") == "bargain_cast"
+                ),
+                None,
+            )
+            _resolve_or_defer_draw(
+                state, 2, item.label, reveal_information, source_uid=source_uid
+            )
         else:
             item.resolve(state)
 
@@ -332,7 +399,7 @@ def cast_card(
 
     if physical.name == "Thoughtcast":
         state.graveyard.append(physical)
-        _resolve_or_defer_draw(state, 2, "Thoughtcast", reveal_information)
+        _resolve_or_defer_draw(state, 2, "Thoughtcast", reveal_information, source_uid=physical.uid)
         state.log(
             "spell_resolution", card=physical.name, uid=physical.uid, mandatory_completed=True,
             permanent_retained=False, functional=True, event_role="execution_outcome",
@@ -359,7 +426,7 @@ def cast_card(
         for trigger in generated:
             state.push(trigger)
         state.log(
-            "bargain_cast", sacrifice=sacrifice_name, sacrifice_uid=sacrifice_uid, sacrifice_type=sacrifice_type,
+            "bargain_cast", spell_uid=physical.uid, sacrifice=sacrifice_name, sacrifice_uid=sacrifice_uid, sacrifice_type=sacrifice_type,
             artifact_count_before=before_artifacts, artifact_count_after=state.artifact_count(),
             metalcraft_before=before_metalcraft, metalcraft_after=state.metalcraft(), payment_before_draw=True,
             battlefield_land_loss=int(sacrifice_type == "land"), colors_lost=colors_lost,
@@ -418,9 +485,9 @@ def cast_card(
         if physical.name == "Blood Fountain":
             state.create_token("Blood", artifact=True)
         elif physical.name == "Baleful Strix":
-            _resolve_or_defer_draw(state, 1, "Baleful Strix", reveal_information)
+            _resolve_or_defer_draw(state, 1, "Baleful Strix", reveal_information, source_uid=physical.uid)
         elif physical.name == "Cryogen Relic":
-            _resolve_or_defer_draw(state, 1, "Cryogen Relic enter draw", reveal_information)
+            _resolve_or_defer_draw(state, 1, "Cryogen Relic enter draw", reveal_information, source_uid=physical.uid)
         elif physical.name == "Refurbished Familiar":
             no_auto_draw_for_familiar(state)
         state.log(
@@ -538,6 +605,29 @@ def apply_planner_action(
         state.log("etb_tempo", card=card.name, entered_tapped=permanent.tapped, blocked_action=blocked, slack_window=not blocked)
         return
 
+    if action.kind == "blood_activation":
+        blood_permanent = next(
+            (p for p in state.battlefield if p.card.uid == action.target_uid and p.card.name == "Blood"),
+            None,
+        )
+        discard = next((card for card in state.hand if card.uid == action.discard_uid), None)
+        if blood_permanent is None or blood_permanent.tapped or discard is None or action.payment is None:
+            raise ValueError("Blood activation resources are no longer available")
+        before_artifacts = state.artifact_count()
+        before_metalcraft = state.metalcraft()
+        execute_payment(state, remap_payment_plan(state, action.payment))
+        state.hand.remove(discard)
+        state.graveyard.append(discard)
+        leave_battlefield(state, blood_permanent, "graveyard", reason="Blood activation")
+        _resolve_or_defer_draw(state, 1, "Blood activation", reveal_information, source_uid=blood_permanent.card.uid)
+        state.log(
+            "blood_activation", discarded=discard.name, discarded_uid=discard.uid,
+            artifact_count_before=before_artifacts, artifact_count_after=state.artifact_count(),
+            metalcraft_before=before_metalcraft, metalcraft_after=state.metalcraft(),
+            mana_paid=1, event_role="option_execution",
+        )
+        return
+
     card = next(card for card in state.hand if card.uid == action.card_uid)
     target = next((p for p in state.battlefield if p.card.uid == action.target_uid), None)
     sacrifice = next((p for p in state.battlefield if p.card.uid == action.sacrifice_uid), None)
@@ -574,6 +664,7 @@ def enumerate_action_sequences(
     max_depth: int = 8,
     include_land_actions: bool = True,
     information_policy_name: str = BASELINE_INFORMATION_POLICY,
+    search_audit: dict[str, Any] | None = None,
 ) -> list[ActionSequenceResult]:
     """Enumerate causal visible-state sequences through unresolved chance nodes.
 
@@ -595,6 +686,21 @@ def enumerate_action_sequences(
     initial_event_count = len(state.events)
     results: list[ActionSequenceResult] = []
     visited: set[tuple] = set()
+    audit = search_audit if search_audit is not None else {}
+    audit.clear()
+    audit.update({
+        "configured_max_depth": int(max_depth),
+        "root_actions": 0,
+        "expanded_nodes": 0,
+        "branches_considered": 0,
+        "recorded_states": 0,
+        "terminal_nodes": 0,
+        "prunes_dedup": 0,
+        "prunes_illegal": 0,
+        "stopping_reasons": {"depth_limit": 0, "no_actions": 0, "dedup": 0},
+        "maximum_explored_depth": 0,
+        "maximum_sequence_length": 0,
+    })
 
     def record(
         current: GameState,
@@ -637,6 +743,8 @@ def enumerate_action_sequences(
             artifact_loss=len(initial_artifact_uids - current_artifact_uids),
         )
         results.append(ActionSequenceResult(copy.deepcopy(current), labels, option, actions))
+        audit["recorded_states"] += 1
+        audit["maximum_sequence_length"] = max(audit["maximum_sequence_length"], len(actions))
 
     def recurse(
         current: GameState,
@@ -654,16 +762,31 @@ def enumerate_action_sequences(
         root_path = tuple(str(action.key) for action in actions[:1])
         key = _visible_search_key(current, due, hard, spells, depth, root_path)
         if key in visited:
+            audit["prunes_dedup"] += 1
+            audit["stopping_reasons"]["dedup"] += 1
             return
         visited.add(key)
+        audit["expanded_nodes"] += 1
+        audit["maximum_explored_depth"] = max(audit["maximum_explored_depth"], depth)
         record(current, labels, actions, due, hard, spells, raw_spells)
         if depth >= max_depth:
+            audit["terminal_nodes"] += 1
+            audit["stopping_reasons"]["depth_limit"] += 1
             return
-        for action in generate_legal_actions(current, deck, include_land_actions=include_land_actions):
+        legal_actions = generate_legal_actions(current, deck, include_land_actions=include_land_actions)
+        if depth == 0:
+            audit["root_actions"] = len(legal_actions)
+        if not legal_actions:
+            audit["terminal_nodes"] += 1
+            audit["stopping_reasons"]["no_actions"] += 1
+            return
+        audit["branches_considered"] += len(legal_actions)
+        for action in legal_actions:
             branch = copy.deepcopy(current)
             try:
                 apply_planner_action(branch, deck, action, scry_policy_name=scry_policy_name, reveal_information=False)
             except ValueError:
+                audit["prunes_illegal"] += 1
                 continue
             next_labels = labels + (action.label,)
             next_actions = actions + (action,)
@@ -677,6 +800,8 @@ def enumerate_action_sequences(
                 next_spells, next_raw_spells, depth + 1,
             )
 
+    if max_depth <= 0:
+        raise ValueError("planner max_depth must be positive")
     recurse(copy.deepcopy(state), (), (), 0, 0, 0, 0, 0)
     return results
 
@@ -744,6 +869,8 @@ def execute_action_policy(
         record_timing_snapshot(state, deck, "after_relevant_action")
     state.log(
         "policy_action_sequence", policy=action_policy_name, reserve_policy=reserve_policy_name,
+        scry_policy=scry_policy_name, information_policy=information_policy_name,
+        planner_search_depth=search_depth, planner_max_actions=max_actions,
         selected=executed,
         causal_root_decisions=roots, replanned_after_information=True,
     )
@@ -776,6 +903,7 @@ def simulate_trial(
     on_play: bool,
     mulligan_policy: str,
     sequencing_policy: str,
+    scry_policy_name: str | None = None,
     audit_full_action_policy: bool = True,
     information_policy_name: str = BASELINE_INFORMATION_POLICY,
     reserve_policy_name: str = BASELINE_RESERVE_POLICY,
@@ -797,7 +925,11 @@ def simulate_trial(
         trial_id=trial, scenario_id=scenario_label, replicate_id=seed,
     )
     action_policy = BASELINE_ACTION_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_ACTION_POLICY
-    scry_policy = BASELINE_SCRY_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_SCRY_POLICY
+    # Legacy callers may omit the scry axis, but Phase 3 callers pass it
+    # independently. Sequencing must never silently select a different scry
+    # policy when an explicit scry identity is supplied.
+    if scry_policy_name is None:
+        scry_policy_name = BASELINE_SCRY_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_SCRY_POLICY
     state.log(
         "opening_hand", opening_land_count=raw_lands, keep_size=len(result.hand), mulligans=result.mulligans,
         bottomed=[card.name for card in result.bottomed],
@@ -819,7 +951,7 @@ def simulate_trial(
                 access_t2[color] = bool(find_payment_plan(state, ManaCost(colored={color: 1})))
             ub_t2 = bool(find_payment_plan(state, ManaCost(colored={"U": 1, "B": 1})))
         sequences = enumerate_action_sequences(
-            state, deck, scry_policy_name=scry_policy,
+            state, deck, scry_policy_name=scry_policy_name,
             information_policy_name=information_policy_name,
             max_depth=planner_search_depth,
         )
@@ -829,7 +961,7 @@ def simulate_trial(
             spell_plus_interaction_feasible=any(result.option.spell_executions >= 1 and result.option.reserve_preserved for result in sequences),
         )
         execute_action_policy(
-            state, deck, action_policy_name=action_policy, scry_policy_name=scry_policy,
+            state, deck, action_policy_name=action_policy, scry_policy_name=scry_policy_name,
             information_policy_name=information_policy_name, reserve_policy_name=reserve_policy_name,
             search_depth=planner_search_depth, max_actions=planner_max_actions,
         )
@@ -858,8 +990,22 @@ def simulate_trial(
         state.end_phase("end")
 
     cast_names = [event["card"] for event in state.events if event["event"] == "spell_cast"]
+    executed_identity = {
+        "candidate": candidate_label,
+        "mulligan_policy": mulligan_policy,
+        "sequencing_policy": sequencing_policy,
+        "scry_policy": scry_policy_name,
+        "information_policy": information_policy_name,
+        "reserve_policy": reserve_policy_name,
+        "planner_search_depth": int(planner_search_depth),
+        "planner_max_actions": int(planner_max_actions),
+    }
+    for event in state.events:
+        event.update(executed_identity)
+
     row = {
         "candidate": candidate_label, "scenario": scenario_label, "replicate": seed, "trial": trial,
+        **executed_identity,
         "pairing_id": f"scenario={scenario_label}|replicate={seed}|trial={trial}|on_play={int(on_play)}",
         "on_play": on_play,
         "raw_opening_lands": raw_lands, "raw_W": raw_presence["W"], "raw_U": raw_presence["U"],

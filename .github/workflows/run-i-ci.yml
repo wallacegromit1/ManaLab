@@ -1,0 +1,116 @@
+name: Run I remediation CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: run-i-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip PyYAML
+      - name: Verify frozen archive hashes
+        run: |
+          echo "82d1dcd663de5a8bcb2d9917271fba264c509bdff8b45d1920b9f97ccf0d0c71  archives/Mana_Lab_Pauper_v1_Run_E.zip" | sha256sum -c -
+          echo "ca7f2ed96cfc0a19041304af4d29bdbb4bf9c9b3908d10f35ffadb0599813e9d  archives/Mana_Lab_Pauper_v1_Run_G.zip" | sha256sum -c -
+      - name: Untouched Run E regression (179)
+        run: |
+          rm -rf /tmp/run_e && mkdir /tmp/run_e
+          unzip -q archives/Mana_Lab_Pauper_v1_Run_E.zip -d /tmp/run_e
+          root="$(find /tmp/run_e -type d -name mana-lab-pauper | head -1)"
+          cd "$root"
+          PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v 2>&1 | tee /tmp/run_e_tests.txt
+          grep -Eq "Ran 179 tests" /tmp/run_e_tests.txt
+      - name: Untouched Run G regression (205)
+        run: |
+          rm -rf /tmp/run_g && mkdir /tmp/run_g
+          unzip -q archives/Mana_Lab_Pauper_v1_Run_G.zip -d /tmp/run_g
+          root="$(find /tmp/run_g -type d -name mana-lab-pauper | head -1)"
+          cd "$root"
+          PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -v 2>&1 | tee /tmp/run_g_tests.txt
+          grep -Eq "Ran 205 tests" /tmp/run_g_tests.txt
+      - name: Run I working-tree tests
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -m unittest discover -s tests -v
+      - name: Candidate-neutral production machinery reproducibility
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python - <<'PY'
+          import json, tempfile
+          from pathlib import Path
+          from mana_lab.phase3_config import load_phase3_config
+          from mana_lab.phase3_pipeline import Phase3Pipeline
+
+          root = Path('.').resolve()
+          config = load_phase3_config(root / 'RUN_G_PHASE3_FROZEN_CONFIG.yaml')
+          with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
+              p1 = Phase3Pipeline(root, config, first)
+              a = p1.run_real()
+              restart = p1.run_real()
+              p2 = Phase3Pipeline(root, config, second)
+              b = p2.run_real()
+              assert a == restart
+              assert a == b
+              assert not a['ranking_produced']
+              assert not a['recommendation_produced']
+              print('RUN_I_PIPELINE_MANIFEST=' + json.dumps(a, sort_keys=True))
+          PY
+      - name: Run I provenance identities
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from mana_lab.phase3_config import load_phase3_config, scientific_config_hash
+          from mana_lab.phase3_policies import policy_hashes
+          from mana_lab.provenance import content_tree_hash, source_manifest
+          from mana_lab.phase3_pipeline import Phase3Pipeline
+          import tempfile
+
+          root = Path('.').resolve()
+          cfg = load_phase3_config(root / 'RUN_G_PHASE3_FROZEN_CONFIG.yaml')
+          with tempfile.TemporaryDirectory() as out:
+              p = Phase3Pipeline(root, cfg, out)
+              print('RUN_I_PROVENANCE=' + json.dumps({
+                  'code_tree_sha256': content_tree_hash(source_manifest(root)),
+                  'frozen_config_file_sha256': cfg['_config_hash'],
+                  'scientific_config_sha256': scientific_config_hash(cfg),
+                  'policy_hashes': policy_hashes(),
+                  'seed_identity_sha256': p.seed_identity,
+                  'stage_schema_version': 'mana-lab-run-i-stage-v1',
+              }, sort_keys=True))
+          PY
+      - name: Candidate invariants
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          from mana_lab.cards import load_deck
+          from mana_lab.candidates import candidate_count_report
+          d=load_deck('configs/decks/Strixpatch_Affinity_v1.3.deck.yaml')
+          r=candidate_count_report(d)
+          print(r)
+          assert r['enumeration_count']==296706
+          assert r['c0_occurrences']==1
+          assert r['three_bridge_candidates']==56
+          PY
