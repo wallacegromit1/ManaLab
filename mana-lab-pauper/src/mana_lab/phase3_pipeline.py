@@ -192,7 +192,8 @@ class Phase3Pipeline:
             self._validate_candidate_file(candidate_hash, len(rows))
         else:
             self._atomic_text(self._candidate_path(), candidate_text)
-        c0_counts = dict(deck.current_mana_base)
+        current_map = dict(deck.current_mana_base)
+        c0_counts = {land.name: current_map.get(land.name, 0) for land in deck.lands}
         protected = [
             row["candidate_id"] for row in rows
             if row["bridge_count"] == 3 or row["counts"] == c0_counts
