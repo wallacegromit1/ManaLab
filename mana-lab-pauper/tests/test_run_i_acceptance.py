@@ -215,7 +215,9 @@ class RunIAcceptanceTests(unittest.TestCase):
     def test_model_risk_resource_and_target_axes_are_executable(self):
         deck = load_deck(ROOT / "configs/decks/Strixpatch_Affinity_v1.3.deck.yaml")
         blood = self._state_with_lands(deck, ["Great Furnace"])
-        blood.battlefield.append(Permanent(make_card("blood", "Blood", artifact=True, token=True)))
+        blood.battlefield.append(
+            Permanent(make_card("blood", "Blood", artifact=True), token=True)
+        )
         blood.hand = [make_card("discard", "Nihil Spellbomb", artifact=True)]
         option = blood_activation_option(blood, deck)
         self.assertTrue(option.resource_payable)
