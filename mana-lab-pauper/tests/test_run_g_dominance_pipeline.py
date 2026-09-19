@@ -86,7 +86,7 @@ class RunGPipelineDryRunTests(unittest.TestCase):
                 self.assertTrue((root / name).read_bytes())
             # Reuse must validate raw scientific evidence, not just stage hashes.
             event_path = root / "03_trial_events.jsonl"
-            event_path.write_text(event_path.read_text() + "{}\\n")
+            event_path.write_text(event_path.read_text() + "{}\n")
             with self.assertRaisesRegex(RuntimeError, "tampered raw-event payload"):
                 Phase3Pipeline(ROOT, self.config, output).stage_04_medium()
 
