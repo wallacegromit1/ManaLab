@@ -193,9 +193,10 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
     affinity_cards = {"Thoughtcast", "Myr Enforcer", "Refurbished Familiar", "Utrom Monitor"}
     draw_development = {"Baleful Strix", "Cryogen Relic", "Thoughtcast"}
     t4_uids = {
-        str(event.get("uid"))
+        str(event.get("uid")) if event.get("uid") is not None
+        else f"{event.get('card')}|event={event.get('event_id')}"
         for event in functional
-        if int(event.get("turn", 0)) == 4 and event.get("uid") is not None
+        if int(event.get("turn", 0)) == 4
     }
     return {
         "T2_STRIX_UB": resolved_by("Baleful Strix", 2),
@@ -225,12 +226,12 @@ def aggregate_trial_events(events: Iterable[Mapping[str, Any]]) -> dict[str, Any
         event for event in rows
         if event["event"] == "state_snapshot" and event.get("event_role") == "primary_pre_spend_opportunity"
     ]
-    if not primary_snapshots:
-        raise ValueError("incomplete trial trace: no primary pre-spend state snapshot")
     raw_primary_spells = [
         event for event in rows
         if event["event"] == "spell_window" and event.get("event_role") == "primary_pre_spend_opportunity"
     ]
+    if not primary_snapshots and not raw_primary_spells:
+        raise ValueError("incomplete trial trace: no primary pre-spend opportunity")
     # A card/turn/timing opportunity can have multiple desired-window profile
     # labels. The generic trial denominator counts the physical opportunity once;
     # profile-specific aggregation keeps profile populations separate upstream.
