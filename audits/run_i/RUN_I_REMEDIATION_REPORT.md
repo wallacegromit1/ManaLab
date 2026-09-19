@@ -71,9 +71,16 @@ end-to-end production inference. Implementation: `metrics.py` and
 cases, distinguish one-sided no-worse from two-sided equivalence, compute
 key-aligned paired differences, Holm family control, conservative
 across-look Bonferroni bounds, oriented frontier and regret primitives.
-Pending: frozen profile/stage/candidate comparison families and adaptive
-looks must actually be invoked from production stages; reversible
-screening ledger and full paired-difference table families remain absent.
+The new `phase3_screening_ledger.py` is an append-only, reversible,
+family-registered paired-evidence ledger. It retains protected/low-N cases,
+rejects validation-partition leakage and unregistered looks, and never treats
+one profile comparison as overall elimination. Stage 03 exercises it only
+on two labels for identical C0 at four trials, below the 512-trial gate.
+Pending: register complete actual candidate/profile/stage comparison families
+before any real performance analysis, invoke and validate the entire
+stage-04–09 selection/validation/frontier path, and independently audit
+raw-event lineage and full paired-difference output. The QA-only ledger
+probe does NOT close H-04 or authorize screening real candidates.
 
 ## H-05 — PARTIAL
 
