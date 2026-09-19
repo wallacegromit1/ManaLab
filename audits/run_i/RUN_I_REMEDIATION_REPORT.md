@@ -43,10 +43,14 @@ Implementation: `phase3_profiles.py` reconstructs six named ordered
 vectors from trial events, distinguishes all/colored/affinity populations,
 keeps turn/scenario/aggregation IDs, applies explicit declared turn weights,
 and supports paired-component comparisons, leave-one-out and declared
-de-correlated variants. Pending: complete hand-calculated, play/draw-weighted
-fixture matrix for every component, execution of all sensitivity variants
-through a production decision caller, absent-population policies and
-cross-population pairing proof.
+de-correlated variants. Raw profile aggregation now optionally enforces
+preregistered play/draw weights rather than silently using the observed
+trial-count mix; paired profile intervals have the matching stratified
+estimator. Hand-calculated play/draw fixtures exercise those paths.
+Pending: complete hand-calculated population/turn fixture matrix for every
+profile component, mandatory weighted use in real stages 04–09,
+execution of all sensitivity variants through a production decision caller,
+missing-population and cross-population pairing audit.
 
 ## H-03 — PARTIAL
 
