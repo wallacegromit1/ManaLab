@@ -40,7 +40,10 @@ def leave_battlefield(
             state.exile.append(permanent.card)
     else:
         raise ValueError("unsupported destination")
-    state.log("permanent_left", card=permanent.card.name, destination=destination, reason=reason)
+    state.log(
+        "permanent_left", card=permanent.card.name, uid=permanent.card.uid,
+        destination=destination, reason=reason,
+    )
     if permanent.card.name == "Cryogen Relic":
         state.push(draw_trigger("Cryogen Relic leave draw"))
     if permanent.card.name == "Nihil Spellbomb" and destination == "graveyard":
