@@ -1,10 +1,25 @@
 import unittest
+import hashlib
 
-from mana_lab.simulator import simulate_trial
+from mana_lab.simulator import _stable_scenario_seed, simulate_trial
 from common import deck_spec
 
 
 class RNGCandidateNeutralityTests(unittest.TestCase):
+    def test_rng_matches_frozen_purpose_scenario_replicate_trial_attempt_contract(self):
+        payload = b"mulligan_draw|baseline_primary|2026091701|17|2"
+        expected = int.from_bytes(hashlib.sha256(payload).digest()[:8], "big")
+        observed = _stable_scenario_seed(2026091701, "baseline_primary", 17, 2)
+        self.assertEqual(observed, expected)
+        self.assertNotEqual(
+            observed,
+            _stable_scenario_seed(2026091702, "baseline_primary", 17, 2),
+        )
+        self.assertNotEqual(
+            observed,
+            _stable_scenario_seed(2026091701, "baseline_primary", 17, 3),
+        )
+
     def test_candidate_label_does_not_change_trial_randomness(self):
         deck = deck_spec()
         kwargs = dict(
