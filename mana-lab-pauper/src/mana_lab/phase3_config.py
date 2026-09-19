@@ -145,6 +145,25 @@ def validate_phase3_config(
         raise ValueError("selection/validation/replicate seed partitions overlap")
     if random["selection_seed"] == random["validation_seed"]:
         raise ValueError("fresh validation seed equals selection seed")
+    all_seeds = [
+        random["selection_seed"], random["validation_seed"], *random["replicate_seeds"]
+    ]
+    if any(not isinstance(seed, int) or seed <= 0 for seed in all_seeds):
+        raise ValueError("all declared seeds must be positive integers")
+    if len(set(all_seeds)) != len(all_seeds):
+        raise ValueError("seed declarations must be globally unique")
+    if len(random["replicate_seeds"]) != int(config["trial_plan"]["replicate_count"]):
+        raise ValueError("replicate seed count does not match replicate_count")
+    if random.get("pairing_keys") != ["scenario", "replicate", "trial", "on_play"]:
+        raise ValueError("paired comparison keys differ from the frozen contract")
+    expected_derivation = (
+        "SHA-256(purpose|scenario|replicate|trial|mulligan_attempt); "
+        "candidate identity and iteration order excluded"
+    )
+    if random.get("seed_derivation") != expected_derivation:
+        raise ValueError("seed derivation declaration differs from frozen contract")
+    if not isinstance(random.get("validation_isolation"), str) or not random["validation_isolation"].strip():
+        raise ValueError("validation isolation declaration is missing")
 
     counts = config["trial_plan"]
     for field in (
