@@ -1,0 +1,37 @@
+{
+  "schema_version": "mana-lab-run-i-stage-v1",
+  "runtime_contract_file": "mana-lab-pauper/src/mana_lab/phase3_stage_schemas.py",
+  "lineage_fields": [
+    "stage_schema_version",
+    "scientific_config_hash",
+    "code_tree_hash",
+    "policy_identity_hash",
+    "seed_identity_hash",
+    "prerequisite_hash",
+    "artifact_content_hash"
+  ],
+  "stage_order": [
+    "01_validate",
+    "02_enumerate",
+    "03_screen",
+    "04_medium",
+    "05_select_finalists",
+    "06_fresh_validation",
+    "07_robustness",
+    "08_frontier",
+    "09_report"
+  ],
+  "candidate_payload": "02_candidates.jsonl",
+  "candidate_count": 296706,
+  "protected_identifiers_count": 57,
+  "raw_trace_payloads": [
+    "03_trial_events.jsonl",
+    "07_robustness_events.jsonl"
+  ],
+  "atomic_write": "fsync temporary file + os.replace; immutable reuse only when canonical content equivalent",
+  "stage03_execution": "candidate-neutral identical C0 labels; real simulation aggregation paired statistics code paths",
+  "stage07_execution": "candidate-neutral frozen policy tuples",
+  "full_live_candidate_stage_execution_complete": false,
+  "authorization": false,
+  "no_optimization": true
+}
