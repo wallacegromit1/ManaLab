@@ -2,7 +2,7 @@
 
 | Defect | Files/functions | Remediation | Residual |
 |---|---|---|---|
-| H-01 | `phase3_pipeline.Phase3Pipeline`, `phase3_config.validate_phase3_config`, `phase3_stage_schemas.validate_stage_envelope` | Persists full legal identity set and raw C0-neutral events, checks lineage/payload hashes, atomic writes/restart, exact protected set | Stages 04/05/06/08/09 lack complete production candidate algorithms |
+| H-01 | `phase3_pipeline.Phase3Pipeline`, `phase3_config.validate_phase3_config`, `phase3_stage_schemas.validate_stage_envelope` | Persists full legal identity set and raw C0-neutral events, checks lineage/payload hashes, atomic writes/restart, exact protected set; declared RNG mapping | Stages 04/05/06/08/09 lack complete production candidate algorithms |
 | H-02 | `phase3_profiles.aggregate_profile_events`, `compare_profile_trials`, `component_population_id` | Six raw event-based ordered profile vectors, explicit populations and weighted turns | Not called by real candidate-selection/validation stages; further sensitivity tests needed |
 | H-03 | `phase3_metrics.*`, `state.GameState.draw`, `simulator.cast_card` | Source IDs, by-turn predicates, duplicate/mixed ID rejection, trace-derived tables | Full executable numeric routes and complete joins/denominators not finished |
 | H-04 | `statistics.paired_difference`, `holm_family`, `adaptive_paired_difference`; `metrics.uncertainty_aware_*` | Finite CI validation, keyed paired intervals, Holm, sequential Bonferroni, oriented frontier/regret | Production multiplicity families and reversible screen ledger missing |
