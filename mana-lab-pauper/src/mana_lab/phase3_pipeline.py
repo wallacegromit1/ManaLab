@@ -19,6 +19,7 @@ from .phase3_metrics import (
     validate_aggregation_coverage, validate_production_event_stream,
 )
 from .phase3_policies import policy_hashes, validate_policy_freeze
+from .phase3_screening_ledger import ReversibleScreeningLedger
 from .phase3_stage_schemas import validate_stage_envelope
 from .provenance import content_tree_hash, source_manifest
 from .simulator import simulate_trial
@@ -374,6 +375,28 @@ class Phase3Pipeline:
         )
         if paired_table["mean_difference"] != 0.0:
             raise RuntimeError("trace-derived paired table diverged for identical C0 fixtures")
+        # The registered, family-corrected ledger is exercised ONLY on two
+        # labels for the identical frozen C0 mana base. Four trials are below
+        # the actual 512-trial screening minimum and must never eliminate.
+        ledger = ReversibleScreeningLedger(
+            candidate_bridge_counts={"fixture_a": 4, "fixture_b": 4},
+            protected_candidates=(),
+            registered_claims=(("fixture_a", "fixture_b",
+                                "candidate_neutral_qa", "spell_castable_rate"),),
+            family_id="run_i_candidate_neutral_machinery",
+            minimum_trials=int(self.config["trial_plan"]["screening_trials_per_candidate"]),
+            maximum_looks=1,
+        )
+        ledger_probe = ledger.record(
+            comparator="fixture_a", candidate="fixture_b",
+            profile="candidate_neutral_qa", look=1,
+            components={"spell_castable_rate": (
+                observations["fixture_a"], observations["fixture_b"]
+            )},
+            dimensions={"spell_castable_rate": ("higher", 0.0025, 0.005)},
+        )
+        if ledger_probe.status != "RETAIN_INSUFFICIENT_EVIDENCE":
+            raise RuntimeError("candidate-neutral screening ledger prematurely eliminated")
         dominant = uncertainty_aware_dominance({
             "fixture": MetricEvidence("higher", False, paired.mean_difference,
                 paired.confidence_low, paired.confidence_high, 0.0025, 0.005)
@@ -398,6 +421,14 @@ class Phase3Pipeline:
                 "candidate_rows": len(candidate_table),
                 "spell_rows": len(spell_table),
                 "paired_row": paired_table,
+            },
+            "screening_ledger_probe": {
+                "family_id": ledger.family_id,
+                "registered_claim_count": len(ledger.claims),
+                "history_rows": len(ledger.audit_rows()),
+                "audit_hash": ledger.audit_hash(),
+                "status": ledger_probe.status,
+                "real_candidate_evidence": False,
             },
             "real_candidate_performance_screened": False,
         }, prerequisite=prior)
