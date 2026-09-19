@@ -57,7 +57,9 @@ class RunGConfigAndProfileTests(unittest.TestCase):
         })
         self.assertEqual(left[0].metric, "double_spell_success")
         self.assertEqual(left[0].value, 0.31)
-        self.assertEqual(compare_profile_vectors(left, right), "better")
+        # Run H H-02 supersedes the first-component-wins behavior:
+        # materially opposed components must remain an explicit conflict.
+        self.assertEqual(compare_profile_vectors(left, right), "conflict")
 
     def test_missing_profile_metric_is_an_error(self):
         profile = self.config["decision_profiles"]["balanced"]
