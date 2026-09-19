@@ -238,11 +238,24 @@ def _trial_component_value(component: Mapping[str, Any], events: Iterable[Mappin
 
     if metric == "critical_sequence_success":
         predicates = evaluate_critical_sequences(rows)
-        selected = [
-            value for name, value in predicates.items()
-            if any(int(token[1:]) in turns for token in re.findall(r"T\d+", name))
-            or name.startswith("OPP_")
-        ]
+        text = str(component["aggregation"]).lower()
+        if "affinity and cryogen/hawk" in text:
+            names = (
+                "T2_THOUGHTCAST", "T2_FAMILIAR", "T2_MONITOR",
+                "T3_CRYOGEN_HAWK_LOOP", "T3_AFFINITY_PLUS_INTERACTION",
+            )
+            selected = [
+                predicates[name] for name in names
+                if int(re.search(r"T(\d+)", name).group(1)) in turns
+            ]
+        else:
+            selected = [
+                value for name, value in predicates.items()
+                if (
+                    (match := re.search(r"T(\d+)", name)) is not None
+                    and int(match.group(1)) in turns
+                )
+            ]
         if not selected:
             raise ValueError("critical-sequence population is empty")
         return fmean(float(value) for value in selected)
