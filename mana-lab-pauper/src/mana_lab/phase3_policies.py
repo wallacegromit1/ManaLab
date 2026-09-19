@@ -5,6 +5,7 @@ import json
 from typing import Any, Mapping
 
 from .mulligan import ALTERNATE_MULLIGAN, BASELINE_MULLIGAN
+from . import policies as policy_impl
 from .policies import (
     ALTERNATE_ACTION_POLICY,
     ALTERNATE_LAND_POLICY,
@@ -75,6 +76,27 @@ POLICY_REGISTRY: dict[str, dict[str, Any]] = {
     for name, content in _POLICY_CONTENT.items()
 }
 
+# Runtime binding guard: the registry describes contracts, while these object
+# identities bind the frozen contract to the executable implementation loaded
+# for this process.  Tests intentionally monkeypatch these callables to prove
+# that a valid descriptive hash cannot mask a replaced implementation.
+_RUNTIME_BINDINGS = {
+    "choose_action": policy_impl.choose_action,
+    "make_scry_policy": policy_impl.make_scry_policy,
+}
+_ROLE_KIND = {
+    "sequencing_baseline": "sequencing",
+    "sequencing_alternate": "sequencing",
+    "mulligan_baseline": "mulligan",
+    "mulligan_alternate": "mulligan",
+    "scry_baseline": "scry",
+    "scry_alternate": "scry",
+    "reserve_baseline": "reserve",
+    "reserve_alternate": "reserve",
+    "information_baseline": "information",
+    "information_alternate": "information",
+}
+
 
 def policy_hashes() -> dict[str, str]:
     return {name: entry["content_hash"] for name, entry in sorted(POLICY_REGISTRY.items())}
@@ -90,7 +112,15 @@ def validate_policy_freeze(frozen: Mapping[str, Any]) -> None:
         name = item.get("id")
         if name not in POLICY_REGISTRY:
             raise ValueError(f"unknown policy id for {role}: {name}")
-        expected = POLICY_REGISTRY[str(name)]["content_hash"]
+        entry = POLICY_REGISTRY[str(name)]
+        expected_kind = _ROLE_KIND.get(str(role))
+        if expected_kind is None:
+            raise ValueError(f"unknown policy role: {role}")
+        if entry.get("kind") != expected_kind:
+            raise ValueError(
+                f"policy role-kind mismatch for {role}: expected {expected_kind}, got {entry.get('kind')}"
+            )
+        expected = entry["content_hash"]
         if item.get("content_hash") != expected:
             raise ValueError(f"policy hash drift for {role}/{name}")
 
@@ -103,3 +133,10 @@ def validate_policy_freeze(frozen: Mapping[str, Any]) -> None:
     missing = required_roles - set(requested)
     if missing:
         raise ValueError(f"policy freeze missing roles: {sorted(missing)}")
+    extra = set(requested) - required_roles
+    if extra:
+        raise ValueError(f"policy freeze has unknown roles: {sorted(extra)}")
+    if policy_impl.choose_action is not _RUNTIME_BINDINGS["choose_action"]:
+        raise ValueError("policy executable binding drift: choose_action")
+    if policy_impl.make_scry_policy is not _RUNTIME_BINDINGS["make_scry_policy"]:
+        raise ValueError("policy executable binding drift: make_scry_policy")
