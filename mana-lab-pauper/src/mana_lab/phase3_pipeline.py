@@ -303,13 +303,10 @@ class Phase3Pipeline:
             str(payload["candidate_payload_hash"]), int(payload["candidate_count"])
         )
         protected = set(payload["protected_candidate_ids"])
+        deck = load_deck(self.root / self.config["input"]["deck_spec"]["path"])
+        c0_map = dict(deck.current_mana_base)
         c0_counts = {
-            land.name: dict(
-                load_deck(self.root / self.config["input"]["deck_spec"]["path"]).current_mana_base
-            ).get(land.name, 0)
-            for land in load_deck(
-                self.root / self.config["input"]["deck_spec"]["path"]
-            ).lands
+            land.name: c0_map.get(land.name, 0) for land in deck.lands
         }
         expected = {
             row["candidate_id"] for row in rows
