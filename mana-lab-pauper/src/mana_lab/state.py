@@ -87,7 +87,9 @@ class GameState:
         self._window_counter += 1
         return self._window_counter
 
-    def draw(self, count: int = 1, reason: str = "draw") -> list[PhysicalCard]:
+    def draw(
+        self, count: int = 1, reason: str = "draw", *, source_uid: str | None = None
+    ) -> list[PhysicalCard]:
         drawn: list[PhysicalCard] = []
         for _ in range(count):
             if not self.library:
@@ -95,7 +97,10 @@ class GameState:
             card = self.library.pop(0)
             self.hand.append(card)
             drawn.append(card)
-            self.log("draw", card=card.name, uid=card.uid, reason=reason)
+            self.log(
+                "draw", card=card.name, uid=card.uid, reason=reason,
+                source_uid=source_uid,
+            )
         return drawn
 
     def begin_turn(self, turn: int) -> None:
