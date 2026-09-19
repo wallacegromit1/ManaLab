@@ -237,11 +237,21 @@ def generate_legal_actions(state: GameState, deck: DeckSpec, *, include_land_act
     return sorted(actions, key=lambda action: action.key)
 
 
-def _resolve_or_defer_draw(state: GameState, count: int, reason: str, reveal_information: bool) -> None:
+def _resolve_or_defer_draw(
+    state: GameState,
+    count: int,
+    reason: str,
+    reveal_information: bool,
+    *,
+    source_uid: str | None = None,
+) -> None:
     if reveal_information:
-        state.draw(count, reason=reason)
+        state.draw(count, reason=reason, source_uid=source_uid)
     else:
-        state.log("information_node", kind="draw", count=count, reason=reason)
+        state.log(
+            "information_node", kind="draw", count=count, reason=reason,
+            source_uid=source_uid,
+        )
 
 
 def _information_value(events: list[dict[str, Any]], policy_name: str) -> int:
@@ -277,7 +287,17 @@ def _resolve_simulator_stack(
         item = state.stack.pop()
         state.log("stack_resolve", label=item.label, kind=item.kind)
         if item.label == "Cryogen Relic leave draw":
-            _resolve_or_defer_draw(state, 1, item.label, reveal_information)
+            source_uid = next(
+                (
+                    event.get("uid") for event in reversed(state.events)
+                    if event.get("event") == "permanent_left"
+                    and event.get("card") == "Cryogen Relic"
+                ),
+                None,
+            )
+            _resolve_or_defer_draw(
+                state, 1, item.label, reveal_information, source_uid=source_uid
+            )
         elif item.label == "Nihil Spellbomb optional B draw":
             plan = find_payment_plan(state, ManaCost(colored={"B": 1}))
             state.log(
@@ -290,10 +310,29 @@ def _resolve_simulator_stack(
                 state.log("nihil_draw_declined", reason="black_mana_unavailable")
             else:
                 execute_payment(state, plan)
-                _resolve_or_defer_draw(state, 1, "Nihil Spellbomb", reveal_information)
+                source_uid = next(
+                    (
+                        event.get("uid") for event in reversed(state.events)
+                        if event.get("event") == "permanent_left"
+                        and event.get("card") == "Nihil Spellbomb"
+                    ),
+                    None,
+                )
+                _resolve_or_defer_draw(
+                    state, 1, "Nihil Spellbomb", reveal_information, source_uid=source_uid
+                )
                 state.log("nihil_draw_paid", event_role="option_execution")
         elif item.label == "Reckoner's Bargain":
-            _resolve_or_defer_draw(state, 2, item.label, reveal_information)
+            source_uid = next(
+                (
+                    event.get("spell_uid") for event in reversed(state.events)
+                    if event.get("event") == "bargain_cast"
+                ),
+                None,
+            )
+            _resolve_or_defer_draw(
+                state, 2, item.label, reveal_information, source_uid=source_uid
+            )
         else:
             item.resolve(state)
 
@@ -354,7 +393,7 @@ def cast_card(
 
     if physical.name == "Thoughtcast":
         state.graveyard.append(physical)
-        _resolve_or_defer_draw(state, 2, "Thoughtcast", reveal_information)
+        _resolve_or_defer_draw(state, 2, "Thoughtcast", reveal_information, source_uid=physical.uid)
         state.log(
             "spell_resolution", card=physical.name, uid=physical.uid, mandatory_completed=True,
             permanent_retained=False, functional=True, event_role="execution_outcome",
@@ -381,7 +420,7 @@ def cast_card(
         for trigger in generated:
             state.push(trigger)
         state.log(
-            "bargain_cast", sacrifice=sacrifice_name, sacrifice_uid=sacrifice_uid, sacrifice_type=sacrifice_type,
+            "bargain_cast", spell_uid=physical.uid, sacrifice=sacrifice_name, sacrifice_uid=sacrifice_uid, sacrifice_type=sacrifice_type,
             artifact_count_before=before_artifacts, artifact_count_after=state.artifact_count(),
             metalcraft_before=before_metalcraft, metalcraft_after=state.metalcraft(), payment_before_draw=True,
             battlefield_land_loss=int(sacrifice_type == "land"), colors_lost=colors_lost,
@@ -440,9 +479,9 @@ def cast_card(
         if physical.name == "Blood Fountain":
             state.create_token("Blood", artifact=True)
         elif physical.name == "Baleful Strix":
-            _resolve_or_defer_draw(state, 1, "Baleful Strix", reveal_information)
+            _resolve_or_defer_draw(state, 1, "Baleful Strix", reveal_information, source_uid=physical.uid)
         elif physical.name == "Cryogen Relic":
-            _resolve_or_defer_draw(state, 1, "Cryogen Relic enter draw", reveal_information)
+            _resolve_or_defer_draw(state, 1, "Cryogen Relic enter draw", reveal_information, source_uid=physical.uid)
         elif physical.name == "Refurbished Familiar":
             no_auto_draw_for_familiar(state)
         state.log(
@@ -574,7 +613,7 @@ def apply_planner_action(
         state.hand.remove(discard)
         state.graveyard.append(discard)
         leave_battlefield(state, blood_permanent, "graveyard", reason="Blood activation")
-        _resolve_or_defer_draw(state, 1, "Blood activation", reveal_information)
+        _resolve_or_defer_draw(state, 1, "Blood activation", reveal_information, source_uid=blood_permanent.card.uid)
         state.log(
             "blood_activation", discarded=discard.name, discarded_uid=discard.uid,
             artifact_count_before=before_artifacts, artifact_count_after=state.artifact_count(),
