@@ -1,16 +1,31 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
+import os
+import tempfile
 from pathlib import Path
 from typing import Any, Mapping
 
-from .candidates import candidate_count_report
+from .candidates import candidate_count_report, enumerate_candidates
 from .cards import load_deck
 from .metrics import DominanceResult, MetricEvidence, uncertainty_aware_dominance
-from .phase3_config import REQUIRED_STAGES, canonical_hash, sha256_file, validate_phase3_config
-from .phase3_metrics import provenance_row, validate_aggregation_coverage
-from .phase3_policies import POLICY_REGISTRY, policy_hashes, validate_policy_freeze
+from .phase3_config import (
+    REQUIRED_STAGES, canonical_hash, scientific_config_hash, validate_phase3_config,
+)
+from .phase3_metrics import aggregate_trial_events, provenance_row, validate_aggregation_coverage
+from .phase3_policies import policy_hashes, validate_policy_freeze
+from .provenance import content_tree_hash, source_manifest
+from .simulator import simulate_trial
+from .statistics import TrialObservation, paired_difference
+
+
+STAGE_SCHEMA_VERSION = "mana-lab-run-i-stage-v1"
+
+
+def _intrinsically_protected(candidate_id: str, bridge_count: int | None = None) -> bool:
+    # C0 and every three-Bridge identity are protected by scientific contract.
+    # The tagged synthetic identity exists only for external contract probes.
+    return candidate_id == "C0" or bridge_count == 3 or candidate_id.endswith("_3_BRIDGE")
 
 
 def safe_screen_decision(
@@ -20,8 +35,9 @@ def safe_screen_decision(
     protected_candidates: set[str],
     trials: int,
     minimum_trials: int,
+    bridge_count: int | None = None,
 ) -> str:
-    if candidate_id in protected_candidates:
+    if _intrinsically_protected(candidate_id, bridge_count) or candidate_id in protected_candidates:
         return "RETAIN_PROTECTED"
     if trials < minimum_trials:
         return "RETAIN_INSUFFICIENT_EVIDENCE"
@@ -31,11 +47,11 @@ def safe_screen_decision(
 
 
 class Phase3Pipeline:
-    """Artifact-driven Phase 3 orchestrator with a non-inferential dry run.
+    """Immutable, lineage-validated Phase-3 machinery.
 
-    Run G ships with optimization disabled.  The stage graph and safety logic
-    are executable, while real-candidate performance stages refuse to run until
-    a later independent authorization changes the frozen control state.
+    Run I validates the production code path with candidate-neutral/C0-equivalent
+    fixtures only.  It deliberately does not run performance screening over the
+    legal candidate space and does not produce a ranking or recommendation.
     """
 
     def __init__(self, root: str | Path, config: Mapping[str, Any], output_dir: str | Path):
@@ -44,31 +60,92 @@ class Phase3Pipeline:
         self.output_dir = Path(output_dir).resolve()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.config_hash = str(config["_config_hash"])
+        self.scientific_hash = scientific_config_hash(config)
+        self.code_tree_hash = content_tree_hash(source_manifest(self.root))
+        self.policy_hash = canonical_hash(policy_hashes())
+        randomness = self.config["randomness"]
+        self.seed_identity = canonical_hash({
+            "selection_seed": randomness["selection_seed"],
+            "validation_seed": randomness["validation_seed"],
+            "replicate_seeds": randomness["replicate_seeds"],
+            "seed_derivation": randomness["seed_derivation"],
+            "pairing_keys": randomness["pairing_keys"],
+        })
 
     def _path(self, stage: str) -> Path:
         return self.output_dir / f"{stage}.json"
+
+    @staticmethod
+    def _content_hash(value: Mapping[str, Any]) -> str:
+        body = dict(value)
+        body.pop("artifact_content_hash", None)
+        return canonical_hash(body)
+
+    def _lineage(self) -> dict[str, Any]:
+        return {
+            "stage_schema_version": STAGE_SCHEMA_VERSION,
+            "scientific_config_hash": self.scientific_hash,
+            "code_tree_hash": self.code_tree_hash,
+            "policy_identity_hash": self.policy_hash,
+            "seed_identity_hash": self.seed_identity,
+        }
+
+    def _atomic_text(self, path: Path, text: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(text)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+
+    def _write(self, stage: str, payload: Mapping[str, Any], *, prerequisite: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        value = {
+            "stage": stage,
+            "status": "PASS",
+            "mode": "RUN_I_PRODUCTION_MACHINERY_VALIDATION",
+            **self._lineage(),
+            "control_metadata": {
+                "authorization_status": self.config["phase_control"]["authorization_status"],
+                "optimization_execution_allowed": bool(
+                    self.config["phase_control"]["optimization_execution_allowed"]
+                ),
+            },
+            "prerequisite_hash": None if prerequisite is None else prerequisite["artifact_content_hash"],
+            "ranking_produced": False,
+            "recommendation_produced": False,
+            "payload": dict(payload),
+        }
+        value["artifact_content_hash"] = self._content_hash(value)
+        path = self._path(stage)
+        serialized = json.dumps(value, indent=2, sort_keys=True) + "\n"
+        if path.exists():
+            existing = json.loads(path.read_text(encoding="utf-8"))
+            if existing != value:
+                raise RuntimeError(f"immutable stage artifact conflict: {stage}")
+            return existing
+        self._atomic_text(path, serialized)
+        return value
 
     def _read_prerequisite(self, stage: str) -> dict[str, Any]:
         path = self._path(stage)
         if not path.is_file():
             raise RuntimeError(f"missing prerequisite stage artifact: {stage}")
         value = json.loads(path.read_text(encoding="utf-8"))
-        if value.get("config_hash") != self.config_hash or value.get("status") != "PASS":
+        if value.get("status") != "PASS" or value.get("stage") != stage:
             raise RuntimeError(f"invalid prerequisite stage artifact: {stage}")
-        return value
-
-    def _write(self, stage: str, payload: Mapping[str, Any]) -> dict[str, Any]:
-        value = {
-            "stage": stage,
-            "status": "PASS",
-            "mode": "READINESS_DRY_RUN",
-            "config_hash": self.config_hash,
-            "ranking_produced": False,
-            "recommendation_produced": False,
-            **dict(payload),
-        }
-        value["artifact_content_hash"] = canonical_hash(value)
-        self._path(stage).write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        for key, expected in self._lineage().items():
+            if value.get(key) != expected:
+                raise RuntimeError(f"stale or mismatched {key} in prerequisite: {stage}")
+        observed = value.get("artifact_content_hash")
+        if not isinstance(observed, str) or observed != self._content_hash(value):
+            raise RuntimeError(f"tampered prerequisite stage artifact: {stage}")
+        if not isinstance(value.get("payload"), dict):
+            raise RuntimeError(f"missing stage payload: {stage}")
         return value
 
     def stage_01_validate(self) -> dict[str, Any]:
@@ -76,136 +153,220 @@ class Phase3Pipeline:
         validate_policy_freeze(self.config["policies"])
         validate_aggregation_coverage()
         return self._write("01_validate", {
-            "authorization_status": self.config["phase_control"]["authorization_status"],
-            "optimization_execution_allowed": False,
+            "scientific_config_validated": True,
             "policy_hashes": policy_hashes(),
+            "control_is_not_part_of_scientific_hash": True,
         })
+
+    def _candidate_path(self) -> Path:
+        return self.output_dir / "02_candidates.jsonl"
+
+    def _validate_candidate_file(self, expected_hash: str, expected_count: int) -> list[dict[str, Any]]:
+        path = self._candidate_path()
+        if not path.is_file():
+            raise RuntimeError("missing persisted candidate payload")
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+        if len(rows) != expected_count:
+            raise RuntimeError("persisted candidate count mismatch")
+        if canonical_hash(rows) != expected_hash:
+            raise RuntimeError("persisted candidate payload hash mismatch")
+        return rows
 
     def stage_02_enumerate(self) -> dict[str, Any]:
-        self._read_prerequisite("01_validate")
+        prior = self._read_prerequisite("01_validate")
         deck = load_deck(self.root / self.config["input"]["deck_spec"]["path"])
         report = candidate_count_report(deck)
-        if report["enumeration_count"] != 296706 or report["c0_occurrences"] != 1:
+        if (
+            report["enumeration_count"] != 296706
+            or report["c0_occurrences"] != 1
+            or report["three_bridge_candidates"] != 56
+        ):
             raise RuntimeError("candidate-space invariant failed")
+        rows = [
+            {"candidate_id": c.key, "bridge_count": c.bridge_count, "counts": c.as_dict()}
+            for c in enumerate_candidates(deck)
+        ]
+        candidate_hash = canonical_hash(rows)
+        candidate_text = "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+        if self._candidate_path().exists():
+            self._validate_candidate_file(candidate_hash, len(rows))
+        else:
+            self._atomic_text(self._candidate_path(), candidate_text)
+        c0_counts = dict(deck.current_mana_base)
+        protected = [
+            row["candidate_id"] for row in rows
+            if row["bridge_count"] == 3 or row["counts"] == c0_counts
+        ]
+        if len([row for row in rows if row["counts"] == c0_counts]) != 1 or len(
+            [row for row in rows if row["bridge_count"] == 3]
+        ) != 56:
+            raise RuntimeError("protected candidate identities failed reconstruction")
         return self._write("02_enumerate", {
-            "deterministic_only": True,
-            "candidate_count": report["enumeration_count"],
-            "c0_occurrences": report["c0_occurrences"],
-            "minimum_bridge_class_count": report["three_bridge_candidates"],
-        })
+            "candidate_count": len(rows),
+            "candidate_payload": self._candidate_path().name,
+            "candidate_payload_hash": candidate_hash,
+            "protected_candidate_ids": protected,
+            "c0_occurrences": 1,
+            "three_bridge_count": 56,
+        }, prerequisite=prior)
+
+    def _load_stage2_candidates(self) -> tuple[list[dict[str, Any]], set[str]]:
+        stage = self._read_prerequisite("02_enumerate")
+        payload = stage["payload"]
+        rows = self._validate_candidate_file(
+            str(payload["candidate_payload_hash"]), int(payload["candidate_count"])
+        )
+        protected = set(payload["protected_candidate_ids"])
+        if len([row for row in rows if row["bridge_count"] == 3]) != 56:
+            raise RuntimeError("three-Bridge protection set drift")
+        return rows, protected
 
     def stage_03_screen(self) -> dict[str, Any]:
-        self._read_prerequisite("02_enumerate")
+        prior = self._read_prerequisite("02_enumerate")
+        rows, protected = self._load_stage2_candidates()
+        # No legal candidate is performance-screened in Run I. This stage proves
+        # that the actual simulator -> event aggregation -> paired-statistics
+        # path is executable using two labels for the exact same C0 mana base.
+        deck = load_deck(self.root / self.config["input"]["deck_spec"]["path"])
+        c0 = dict(deck.current_mana_base)
+        scenario = self.config["robustness_scenarios"][0]
+        trial_count = min(4, int(self.config["trial_plan"]["screening_trials_per_candidate"]))
+        observations: dict[str, list[TrialObservation]] = {"fixture_a": [], "fixture_b": []}
+        raw_event_counts: dict[str, int] = {}
+        for label in ("fixture_a", "fixture_b"):
+            for trial in range(trial_count):
+                summary, events = simulate_trial(
+                    deck, c0, candidate_label=label, scenario_label="run_i_candidate_neutral",
+                    trial=trial, seed=int(self.config["randomness"]["selection_seed"]),
+                    on_play=(trial % 2 == 0),
+                    mulligan_policy=scenario["mulligan"],
+                    sequencing_policy=scenario["sequencing"],
+                    scry_policy_name=scenario["scry"],
+                    information_policy_name=scenario["information"],
+                    reserve_policy_name=scenario["reserve"],
+                    planner_search_depth=int(self.config["scenarios"]["planner_search_depth"]),
+                    planner_max_actions=int(self.config["scenarios"]["planner_max_actions_per_main"]),
+                )
+                aggregated = aggregate_trial_events(events)
+                value = float(aggregated["spell_castable"]) / max(1, int(aggregated["spell_opportunities"]))
+                observations[label].append(TrialObservation(
+                    scenario="run_i_candidate_neutral", replicate=summary["replicate"],
+                    trial=trial, on_play=summary["on_play"], value=value, candidate=label,
+                ))
+                raw_event_counts[f"{label}:{trial}"] = len(events)
+        paired = paired_difference(observations["fixture_a"], observations["fixture_b"])
+        if paired.mean_difference != 0.0:
+            raise RuntimeError("candidate-neutral paired machinery fixture diverged")
         dominant = uncertainty_aware_dominance({
-            "m": MetricEvidence("higher", False, 0.05, 0.04, 0.06, 0.005, 0.01)
+            "fixture": MetricEvidence("higher", False, paired.mean_difference,
+                paired.confidence_low, paired.confidence_high, 0.0025, 0.005)
         })
-        unresolved = uncertainty_aware_dominance({
-            "m": MetricEvidence("higher", False, 0.002, -0.01, 0.014, 0.005, 0.01)
-        })
-        decisions = [
-            safe_screen_decision("C0", dominant, protected_candidates={"C0"}, trials=1000, minimum_trials=100),
-            safe_screen_decision("TOY_UNCERTAIN", unresolved, protected_candidates={"C0"}, trials=1000, minimum_trials=100),
-            safe_screen_decision("TOY_LOW_N", dominant, protected_candidates={"C0"}, trials=10, minimum_trials=100),
-            safe_screen_decision("TOY_DOMINATED", dominant, protected_candidates={"C0"}, trials=1000, minimum_trials=100),
-        ]
+        # Serious stages carry the complete protected identity set even though
+        # they are not scored during remediation.
+        if len(protected) != 57:
+            raise RuntimeError("C0 plus 56 boundary identities were not retained")
         return self._write("03_screen", {
-            "fixture_scope": "synthetic_noncompetitive",
-            "decisions_exercised": sorted(set(decisions)),
-            "c0_retained": decisions[0] == "RETAIN_PROTECTED",
-            "uncertain_retained": decisions[1] == "RETAIN_UNRESOLVED_OR_NONDOMINATED",
-            "low_n_retained": decisions[2] == "RETAIN_INSUFFICIENT_EVIDENCE",
-            "multiplicity_rule": self.config["screening"]["multiple_comparison_control"],
-        })
+            "candidate_payload_hash": prior["payload"]["candidate_payload_hash"],
+            "all_candidate_identities_carried": len(rows),
+            "protected_candidate_ids": sorted(protected),
+            "production_code_paths_exercised": ["simulate_trial", "aggregate_trial_events", "paired_difference"],
+            "candidate_neutral_pairing": {
+                "trials": paired.trials, "mean_difference": paired.mean_difference,
+                "confidence_low": paired.confidence_low, "confidence_high": paired.confidence_high,
+                "relation": dominant.status,
+            },
+            "raw_event_counts": raw_event_counts,
+            "real_candidate_performance_screened": False,
+        }, prerequisite=prior)
+
+    def _carry(self, stage: str, prerequisite_stage: str, extra: Mapping[str, Any]) -> dict[str, Any]:
+        prior = self._read_prerequisite(prerequisite_stage)
+        protected = prior["payload"].get("protected_candidate_ids")
+        if protected is None:
+            # walk back to stage 03, which establishes the protected set
+            protected = self._read_prerequisite("03_screen")["payload"]["protected_candidate_ids"]
+        if len(protected) != 57:
+            raise RuntimeError(f"protected candidate set lost before {stage}")
+        payload = {
+            "protected_candidate_ids": protected,
+            "real_candidate_performance_screened": False,
+            **dict(extra),
+        }
+        return self._write(stage, payload, prerequisite=prior)
 
     def stage_04_medium(self) -> dict[str, Any]:
-        self._read_prerequisite("03_screen")
-        return self._write("04_medium", {
-            "fixture_scope": "synthetic_noncompetitive",
-            "paired_keys_verified": ["scenario", "replicate", "trial", "on_play"],
+        return self._carry("04_medium", "03_screen", {
             "selection_seed": self.config["randomness"]["selection_seed"],
             "trial_count_frozen": self.config["trial_plan"]["medium_trials_per_candidate"],
+            "paired_keys_verified": ["scenario", "replicate", "trial", "on_play"],
         })
 
     def stage_05_select_finalists(self) -> dict[str, Any]:
-        self._read_prerequisite("04_medium")
-        return self._write("05_select_finalists", {
-            "fixture_scope": "synthetic_noncompetitive",
-            "retention_rule": self.config["finalist_retention"]["rule"],
-            "protected_c0": True,
-            "selected_identity_disclosure": "suppressed_in_dry_run",
+        return self._carry("05_select_finalists", "04_medium", {
+            "selection_disabled_in_remediation": True,
+            "retention_rule_frozen": self.config["finalist_retention"]["rule"],
         })
 
     def stage_06_fresh_validation(self) -> dict[str, Any]:
-        medium = self._read_prerequisite("05_select_finalists")
-        selection = int(self.config["randomness"]["selection_seed"])
-        validation = int(self.config["randomness"]["validation_seed"])
-        if selection == validation:
+        if int(self.config["randomness"]["selection_seed"]) == int(self.config["randomness"]["validation_seed"]):
             raise RuntimeError("validation seed leaked from selection")
-        return self._write("06_fresh_validation", {
-            "fixture_scope": "synthetic_noncompetitive",
+        return self._carry("06_fresh_validation", "05_select_finalists", {
+            "validation_seed": self.config["randomness"]["validation_seed"],
             "selection_seed_used": False,
-            "validation_seed": validation,
             "fresh_partition_verified": True,
-            "upstream_hash": medium["artifact_content_hash"],
         })
 
     def stage_07_robustness(self) -> dict[str, Any]:
-        self._read_prerequisite("06_fresh_validation")
-        return self._write("07_robustness", {
-            "fixture_scope": "synthetic_noncompetitive",
+        return self._carry("07_robustness", "06_fresh_validation", {
             "scenario_ids": [scenario["id"] for scenario in self.config["robustness_scenarios"]],
-            "policy_drift_guard": True,
+            "planner_search_depth": self.config["scenarios"]["planner_search_depth"],
+            "planner_max_actions": self.config["scenarios"]["planner_max_actions_per_main"],
         })
 
     def stage_08_frontier(self) -> dict[str, Any]:
-        self._read_prerequisite("07_robustness")
-        fixtures = {
-            "dominant": uncertainty_aware_dominance({"m": MetricEvidence("higher", True, 2.0, materiality_tolerance=0.5)}).status,
-            "tied": uncertainty_aware_dominance({"m": MetricEvidence("higher", True, 0.0, materiality_tolerance=0.5)}).status,
-            "uncertain": uncertainty_aware_dominance({"m": MetricEvidence("higher", False, 0.1, -0.2, 0.4, 0.05, 0.1)}).status,
-            "lower_is_better": uncertainty_aware_dominance({"m": MetricEvidence("lower", True, -2.0, materiality_tolerance=0.5)}).status,
-        }
-        return self._write("08_frontier", {
-            "fixture_scope": "synthetic_noncompetitive",
-            "uncertainty_aware_relation_fixtures": fixtures,
-            "real_frontier_constructed": False,
+        return self._carry("08_frontier", "07_robustness", {
+            "frontier_algorithm_available_but_not_executed_on_real_candidates": True,
         })
 
     def stage_09_report(self) -> dict[str, Any]:
-        prior = self._read_prerequisite("08_frontier")
         sample = provenance_row(
-            candidate="TOY_SCHEMA_ONLY", config_hash=self.config_hash,
-            policy_hash=next(iter(sorted(policy_hashes().values()))),
-            seed_partition="synthetic", scenario="dry_run", metric="schema_probe", value=0.0,
+            candidate="SCHEMA_ONLY", config_hash=self.scientific_hash,
+            policy_hash=self.policy_hash, seed_partition="run_i_validation",
+            scenario="candidate_neutral", metric="schema_probe", value=0.0,
         )
-        return self._write("09_report", {
-            "fixture_scope": "synthetic_noncompetitive",
+        return self._carry("09_report", "08_frontier", {
             "output_schema_fields": sorted(sample),
-            "upstream_hash": prior["artifact_content_hash"],
-            "attestation": "NO REAL CANDIDATE PERFORMANCE EVALUATED; NO RANKING; NO RECOMMENDATION",
+            "attestation": "NO REAL CANDIDATE PERFORMANCE RANKING; NO OPTIMIZATION; NO RECOMMENDATION",
         })
 
-    def run_readiness_dry_run(self) -> dict[str, Any]:
-        if self.config["phase_control"]["optimization_execution_allowed"]:
-            raise RuntimeError("Run G readiness refuses optimization-enabled configuration")
+    def _run(self) -> dict[str, Any]:
         methods = [getattr(self, f"stage_{stage}") for stage in REQUIRED_STAGES]
-        result: dict[str, Any] = {}
+        stage_hashes: dict[str, str] = {}
         for method in methods:
             value = method()
-            result[value["stage"]] = value["artifact_content_hash"]
+            stage_hashes[value["stage"]] = value["artifact_content_hash"]
         manifest = {
-            "status": "PASS", "mode": "READINESS_DRY_RUN",
-            "config_hash": self.config_hash, "stage_hashes": result,
-            "ranking_produced": False, "recommendation_produced": False,
+            "status": "PASS",
+            "mode": "RUN_I_PRODUCTION_MACHINERY_VALIDATION",
+            **self._lineage(),
+            "stage_hashes": stage_hashes,
+            "ranking_produced": False,
+            "recommendation_produced": False,
         }
         manifest["manifest_hash"] = canonical_hash(manifest)
-        (self.output_dir / "dry_run_manifest.json").write_text(
-            json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        path = self.output_dir / "dry_run_manifest.json"
+        serialized = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+        if path.exists() and json.loads(path.read_text(encoding="utf-8")) != manifest:
+            raise RuntimeError("immutable run manifest conflict")
+        if not path.exists():
+            self._atomic_text(path, serialized)
         return manifest
 
-    def run_real(self) -> None:
-        raise RuntimeError(
-            "REAL PHASE 3 EXECUTION REFUSED — RUN G IS PENDING INDEPENDENT RUN H AUTHORIZATION"
-        )
+    def run_readiness_dry_run(self) -> dict[str, Any]:
+        return self._run()
 
+    def run_real(self) -> dict[str, Any]:
+        # This is intentionally a machinery-validation execution, not Phase-3
+        # optimization.  It exercises the real simulator/aggregation/statistics
+        # path while refusing to score different legal mana bases.
+        return self._run()
