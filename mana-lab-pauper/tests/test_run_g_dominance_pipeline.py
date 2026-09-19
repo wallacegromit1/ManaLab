@@ -76,6 +76,20 @@ class RunGPipelineDryRunTests(unittest.TestCase):
             self.assertFalse(result["ranking_produced"])
             self.assertFalse(result["recommendation_produced"])
 
+            root = Path(output)
+            for name, stage in (
+                ("03_trial_events.jsonl", "03_screen"),
+                ("07_robustness_events.jsonl", "07_robustness"),
+            ):
+                record = json.loads((root / f"{stage}.json").read_text())
+                self.assertEqual(record["payload"]["raw_event_payload"]["file"], name)
+                self.assertTrue((root / name).read_bytes())
+            # Reuse must validate raw scientific evidence, not just stage hashes.
+            event_path = root / "03_trial_events.jsonl"
+            event_path.write_text(event_path.read_text() + "{}\\n")
+            with self.assertRaisesRegex(RuntimeError, "tampered raw-event payload"):
+                Phase3Pipeline(ROOT, self.config, output).stage_04_medium()
+
 
 if __name__ == "__main__":
     unittest.main()
