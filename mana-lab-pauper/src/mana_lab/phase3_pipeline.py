@@ -167,6 +167,59 @@ class Phase3Pipeline:
             "control_is_not_part_of_scientific_hash": True,
         })
 
+    def _payload_path(self, name: str) -> Path:
+        if name not in {"03_trial_events", "07_robustness_events"}:
+            raise ValueError("unregistered raw-event payload")
+        return self.output_dir / f"{name}.jsonl"
+
+    def _immutable_events(self, name: str, streams: list[list[dict[str, Any]]]) -> dict[str, Any]:
+        """Persist raw traces with trial boundaries; never retain just a score.
+
+        File identity uses the canonical parsed trace object; the literal bytes
+        are deterministic by sorted-key JSON serialization.
+        """
+        path = self._payload_path(name)
+        identity = canonical_hash(streams)
+        contents = "".join(
+            json.dumps(stream, sort_keys=True, separators=(",", ":")) + "\n"
+            for stream in streams
+        )
+        if path.exists():
+            self._validate_events(name, identity, len(streams))
+        else:
+            self._atomic_text(path, contents)
+        return {
+            "file": path.name,
+            "content_hash": identity,
+            "trial_stream_count": len(streams),
+            "format": "jsonl; one complete ordered trial event array per line",
+        }
+
+    def _validate_events(self, name: str, content_hash: str, expected_count: int) -> list[list[dict[str, Any]]]:
+        path = self._payload_path(name)
+        if not path.is_file():
+            raise RuntimeError(f"missing raw-event payload: {name}")
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+        if len(rows) != expected_count or canonical_hash(rows) != content_hash:
+            raise RuntimeError(f"tampered raw-event payload: {name}")
+        for trial in rows:
+            validate_production_event_stream(trial)
+        return rows
+
+    def _validate_stage_event_payloads(self) -> None:
+        for stage, name in (
+            ("03_screen", "03_trial_events"), ("07_robustness", "07_robustness_events")
+        ):
+            if not self._path(stage).exists():
+                continue
+            value = self._read_prerequisite(stage)
+            record = value["payload"].get("raw_event_payload")
+            if not isinstance(record, dict) or record.get("file") != self._payload_path(name).name:
+                raise RuntimeError(f"missing raw-event manifest: {stage}")
+            self._validate_events(
+                name, str(record["content_hash"]), int(record["trial_stream_count"])
+            )
+
     def _candidate_path(self) -> Path:
         return self.output_dir / "02_candidates.jsonl"
 
@@ -278,6 +331,7 @@ class Phase3Pipeline:
                     trial=trial, on_play=summary["on_play"], value=value, candidate=label,
                 ))
                 raw_event_counts[f"{label}:{trial}"] = len(events)
+        raw_event_payload = self._immutable_events("03_trial_events", production_streams)
         paired = paired_difference(observations["fixture_a"], observations["fixture_b"])
         if paired.mean_difference != 0.0:
             raise RuntimeError("candidate-neutral paired machinery fixture diverged")
@@ -308,6 +362,7 @@ class Phase3Pipeline:
                 "relation": dominant.status,
             },
             "raw_event_counts": raw_event_counts,
+            "raw_event_payload": raw_event_payload,
             "trace_derived_tables": {
                 "candidate_rows": len(candidate_table),
                 "spell_rows": len(spell_table),
@@ -324,6 +379,7 @@ class Phase3Pipeline:
             str(stage2_payload["candidate_payload_hash"]),
             int(stage2_payload["candidate_count"]),
         )
+        self._validate_stage_event_payloads()
         protected = prior["payload"].get("protected_candidate_ids")
         if protected is None:
             # walk back to stage 03, which establishes the protected set
@@ -405,11 +461,13 @@ class Phase3Pipeline:
                     "play_draw": play_draw,
                     "observed_on_play": bool(summary["on_play"]),
                 })
+        raw_event_payload = self._immutable_events("07_robustness_events", streams)
         trial_table = build_candidate_trial_table(streams)
         robustness = build_robustness_table(trial_table, metric="spell_castable")
         return self._carry("07_robustness", "06_fresh_validation", {
             "scenario_ids": [scenario["id"] for scenario in self.config["robustness_scenarios"]],
             "executed_policy_tuples": executed,
+            "raw_event_payload": raw_event_payload,
             "trace_derived_robustness_rows": robustness,
             "planner_search_depth": self.config["scenarios"]["planner_search_depth"],
             "planner_max_actions": self.config["scenarios"]["planner_max_actions_per_main"],
