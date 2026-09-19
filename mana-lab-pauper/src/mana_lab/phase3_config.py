@@ -21,6 +21,7 @@ REQUIRED_STAGES = [
 REQUIRED_PROFILES = {
     "balanced", "tempo_sensitive", "color_consistency",
     "interaction_sensitive", "double_spell_sensitive",
+    "affinity_value_engine",
 }
 BAD_PLACEHOLDERS = {None, "", "TODO", "TBD", "PLACEHOLDER", "UNSPECIFIED"}
 
