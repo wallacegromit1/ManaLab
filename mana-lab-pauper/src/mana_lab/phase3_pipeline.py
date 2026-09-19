@@ -282,6 +282,12 @@ class Phase3Pipeline:
 
     def _carry(self, stage: str, prerequisite_stage: str, extra: Mapping[str, Any]) -> dict[str, Any]:
         prior = self._read_prerequisite(prerequisite_stage)
+        stage2 = self._read_prerequisite("02_enumerate")
+        stage2_payload = stage2["payload"]
+        self._validate_candidate_file(
+            str(stage2_payload["candidate_payload_hash"]),
+            int(stage2_payload["candidate_count"]),
+        )
         protected = prior["payload"].get("protected_candidate_ids")
         if protected is None:
             # walk back to stage 03, which establishes the protected set
