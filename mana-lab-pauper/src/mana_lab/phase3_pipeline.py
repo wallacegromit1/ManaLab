@@ -19,6 +19,7 @@ from .phase3_metrics import (
     validate_aggregation_coverage, validate_production_event_stream,
 )
 from .phase3_policies import policy_hashes, validate_policy_freeze
+from .phase3_stage_schemas import validate_stage_envelope
 from .provenance import content_tree_hash, source_manifest
 from .simulator import simulate_trial
 from .statistics import TrialObservation, paired_difference
@@ -130,6 +131,7 @@ class Phase3Pipeline:
             # authoritative stage contract.
             value["output_schema_fields"] = list(payload["output_schema_fields"])
         value["artifact_content_hash"] = self._content_hash(value)
+        validate_stage_envelope(stage, value)
         path = self._path(stage)
         serialized = json.dumps(value, indent=2, sort_keys=True) + "\n"
         if path.exists():
@@ -155,6 +157,10 @@ class Phase3Pipeline:
             raise RuntimeError(f"tampered prerequisite stage artifact: {stage}")
         if not isinstance(value.get("payload"), dict):
             raise RuntimeError(f"missing stage payload: {stage}")
+        try:
+            validate_stage_envelope(stage, value)
+        except ValueError as exc:
+            raise RuntimeError(f"invalid typed prerequisite {stage}: {exc}") from exc
         if stage not in REQUIRED_STAGES:
             raise RuntimeError(f"unknown prerequisite stage: {stage}")
         index = REQUIRED_STAGES.index(stage)
