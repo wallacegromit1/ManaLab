@@ -125,6 +125,10 @@ class Phase3Pipeline:
             "recommendation_produced": False,
             "payload": dict(payload),
         }
+        if stage == "09_report" and "output_schema_fields" in payload:
+            # Backward-compatible convenience view; typed payload remains the
+            # authoritative stage contract.
+            value["output_schema_fields"] = list(payload["output_schema_fields"])
         value["artifact_content_hash"] = self._content_hash(value)
         path = self._path(stage)
         serialized = json.dumps(value, indent=2, sort_keys=True) + "\n"
