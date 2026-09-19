@@ -80,8 +80,14 @@ def _shuffled(base: list[PhysicalCard], seed: int) -> list[PhysicalCard]:
 
 
 def _stable_scenario_seed(base_seed: int, scenario: str, trial: int, attempt: int) -> int:
-    digest = hashlib.sha256(f"{scenario}|{trial}|{attempt}".encode()).digest()
-    return base_seed + int.from_bytes(digest[:8], "big")
+    """Frozen purpose/scenario/replicate/trial/mulligan-attempt derivation.
+
+    base_seed is the declared selection/validation/replicate seed identity.
+    Candidate label and iteration order are deliberately absent.
+    """
+    payload = f"mulligan_draw|{scenario}|{int(base_seed)}|{int(trial)}|{int(attempt)}"
+    digest = hashlib.sha256(payload.encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big")
 
 
 def _source_presence(hand: list[PhysicalCard], deck: DeckSpec, color: str) -> bool:
