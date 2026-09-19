@@ -66,10 +66,15 @@ class RunGPipelineDryRunTests(unittest.TestCase):
             self.assertIn("policy_hash", final["output_schema_fields"])
             self.assertIn("seed_partition", final["output_schema_fields"])
 
-    def test_real_execution_is_hard_blocked(self):
+    def test_run_i_real_entrypoint_exercises_machinery_without_optimization(self):
+        # Run H H-01 supersedes the Run G unconditional failure expectation.
+        # The entrypoint now executes only a candidate-neutral/C0-equivalent
+        # machinery fixture and must never emit a ranking or recommendation.
         with tempfile.TemporaryDirectory() as output:
-            with self.assertRaisesRegex(RuntimeError, "PENDING INDEPENDENT"):
-                Phase3Pipeline(ROOT, self.config, output).run_real()
+            result = Phase3Pipeline(ROOT, self.config, output).run_real()
+            self.assertEqual(result["status"], "PASS")
+            self.assertFalse(result["ranking_produced"])
+            self.assertFalse(result["recommendation_produced"])
 
 
 if __name__ == "__main__":
