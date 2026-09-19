@@ -12,7 +12,11 @@ from .metrics import DominanceResult, MetricEvidence, uncertainty_aware_dominanc
 from .phase3_config import (
     REQUIRED_STAGES, canonical_hash, scientific_config_hash, validate_phase3_config,
 )
-from .phase3_metrics import aggregate_trial_events, provenance_row, validate_aggregation_coverage
+from .phase3_metrics import (
+    aggregate_trial_events, build_candidate_trial_table, build_paired_difference_table,
+    build_robustness_table, build_spell_table, provenance_row,
+    validate_aggregation_coverage, validate_production_event_stream,
+)
 from .phase3_policies import policy_hashes, validate_policy_freeze
 from .provenance import content_tree_hash, source_manifest
 from .simulator import simulate_trial
@@ -234,6 +238,7 @@ class Phase3Pipeline:
         trial_count = min(4, int(self.config["trial_plan"]["screening_trials_per_candidate"]))
         observations: dict[str, list[TrialObservation]] = {"fixture_a": [], "fixture_b": []}
         raw_event_counts: dict[str, int] = {}
+        production_streams: list[list[dict[str, Any]]] = []
         for label in ("fixture_a", "fixture_b"):
             for trial in range(trial_count):
                 summary, events = simulate_trial(
@@ -248,6 +253,8 @@ class Phase3Pipeline:
                     planner_search_depth=int(self.config["scenarios"]["planner_search_depth"]),
                     planner_max_actions=int(self.config["scenarios"]["planner_max_actions_per_main"]),
                 )
+                validate_production_event_stream(events)
+                production_streams.append(events)
                 aggregated = aggregate_trial_events(events)
                 value = float(aggregated["spell_castable"]) / max(1, int(aggregated["spell_opportunities"]))
                 observations[label].append(TrialObservation(
@@ -258,6 +265,14 @@ class Phase3Pipeline:
         paired = paired_difference(observations["fixture_a"], observations["fixture_b"])
         if paired.mean_difference != 0.0:
             raise RuntimeError("candidate-neutral paired machinery fixture diverged")
+        candidate_table = build_candidate_trial_table(production_streams)
+        spell_table = build_spell_table(production_streams)
+        paired_table = build_paired_difference_table(
+            candidate_table, metric="spell_castable",
+            left_candidate="fixture_a", right_candidate="fixture_b",
+        )
+        if paired_table["mean_difference"] != 0.0:
+            raise RuntimeError("trace-derived paired table diverged for identical C0 fixtures")
         dominant = uncertainty_aware_dominance({
             "fixture": MetricEvidence("higher", False, paired.mean_difference,
                 paired.confidence_low, paired.confidence_high, 0.0025, 0.005)
@@ -277,6 +292,11 @@ class Phase3Pipeline:
                 "relation": dominant.status,
             },
             "raw_event_counts": raw_event_counts,
+            "trace_derived_tables": {
+                "candidate_rows": len(candidate_table),
+                "spell_rows": len(spell_table),
+                "paired_row": paired_table,
+            },
             "real_candidate_performance_screened": False,
         }, prerequisite=prior)
 
@@ -324,8 +344,48 @@ class Phase3Pipeline:
         })
 
     def stage_07_robustness(self) -> dict[str, Any]:
+        deck = load_deck(self.root / self.config["input"]["deck_spec"]["path"])
+        c0 = dict(deck.current_mana_base)
+        streams: list[list[dict[str, Any]]] = []
+        executed: list[dict[str, Any]] = []
+        for index, scenario in enumerate(self.config["robustness_scenarios"]):
+            play_draw = scenario["play_draw"]
+            on_play = False if play_draw == "all_draw" else True
+            summary, events = simulate_trial(
+                deck, c0, candidate_label="C0_ROBUSTNESS_FIXTURE",
+                scenario_label=scenario["id"], trial=index,
+                seed=int(self.config["randomness"]["validation_seed"]),
+                on_play=on_play, mulligan_policy=scenario["mulligan"],
+                sequencing_policy=scenario["sequencing"],
+                scry_policy_name=scenario["scry"],
+                information_policy_name=scenario["information"],
+                reserve_policy_name=scenario["reserve"],
+                planner_search_depth=int(self.config["scenarios"]["planner_search_depth"]),
+                planner_max_actions=int(self.config["scenarios"]["planner_max_actions_per_main"]),
+            )
+            rows = validate_production_event_stream(events)
+            identity = rows[0]
+            for axis in ("mulligan", "sequencing", "scry", "information", "reserve"):
+                event_field = f"{axis}_policy"
+                if identity[event_field] != scenario[axis]:
+                    raise RuntimeError(f"robustness policy axis drift: {scenario['id']} / {axis}")
+            streams.append(events)
+            executed.append({
+                "scenario": scenario["id"],
+                "mulligan": scenario["mulligan"],
+                "sequencing": scenario["sequencing"],
+                "scry": scenario["scry"],
+                "information": scenario["information"],
+                "reserve": scenario["reserve"],
+                "play_draw": play_draw,
+                "observed_on_play": bool(summary["on_play"]),
+            })
+        trial_table = build_candidate_trial_table(streams)
+        robustness = build_robustness_table(trial_table, metric="spell_castable")
         return self._carry("07_robustness", "06_fresh_validation", {
             "scenario_ids": [scenario["id"] for scenario in self.config["robustness_scenarios"]],
+            "executed_policy_tuples": executed,
+            "trace_derived_robustness_rows": robustness,
             "planner_search_depth": self.config["scenarios"]["planner_search_depth"],
             "planner_max_actions": self.config["scenarios"]["planner_max_actions_per_main"],
         })
