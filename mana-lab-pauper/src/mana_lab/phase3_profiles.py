@@ -6,7 +6,7 @@ from statistics import fmean
 from typing import Any, Iterable, Mapping, Sequence
 
 from .phase3_metrics import evaluate_critical_sequences, validate_event_stream
-from .statistics import PairedEstimate, TrialObservation, paired_difference
+from .statistics import PairedEstimate, TrialObservation, paired_difference, stratified_paired_difference
 
 
 @dataclass(frozen=True)
@@ -266,15 +266,46 @@ def _trial_component_value(component: Mapping[str, Any], events: Iterable[Mappin
 def aggregate_profile_events(
     profile: Mapping[str, Any],
     trials: Iterable[Iterable[Mapping[str, Any]]],
+    *,
+    play_draw_weights: Mapping[bool, float] | None = None,
 ) -> tuple[ProfileComponentValue, ...]:
-    """Execute one profile from raw schema-shaped trial traces."""
+    """Execute a profile on raw trials with optional declared play/draw weights.
+
+    Unweighted legacy QA fixtures retain their existing behavior. Production
+    primary-population callers must supply the frozen True/False weights:
+    observed trial-count proportions are not a substitute for that contract.
+    """
     trial_rows = [list(events) for events in trials]
     if not trial_rows:
         raise ValueError("profile aggregation requires trials")
+    strata: dict[bool, list[list[Mapping[str, Any]]]] = {}
+    weights: dict[bool, float] | None = None
+    if play_draw_weights is not None:
+        if not play_draw_weights or any(type(key) is not bool for key in play_draw_weights):
+            raise ValueError("play/draw weights require boolean population keys")
+        weights = {key: float(value) for key, value in play_draw_weights.items()}
+        if any(value <= 0 or value != value or value == float("inf")
+               for value in weights.values()) or abs(sum(weights.values()) - 1.0) > 1e-10:
+            raise ValueError("play/draw weights must be finite, positive and sum to one")
+        for events in trial_rows:
+            valid = validate_event_stream(events)
+            strata.setdefault(bool(valid[0]["on_play"]), []).append(valid)
+        if set(strata) != set(weights):
+            raise ValueError("declared play/draw population stratum is missing")
     metric_values: dict[str, float] = {}
     for component in profile["metric_vector"]:
-        values = [_trial_component_value(component, events) for events in trial_rows]
-        metric_values[str(component["metric"])] = fmean(values)
+        if weights is None:
+            values = [_trial_component_value(component, events) for events in trial_rows]
+            metric_value = fmean(values)
+        else:
+            metric_value = sum(
+                weight * fmean(
+                    _trial_component_value(component, events)
+                    for events in strata[on_play]
+                )
+                for on_play, weight in weights.items()
+            )
+        metric_values[str(component["metric"])] = metric_value
     return evaluate_profile(profile, metric_values)
 
 
@@ -284,8 +315,9 @@ def compare_profile_trials(
     right_trials: Iterable[Iterable[Mapping[str, Any]]],
     *,
     confidence_z: float = 1.96,
+    play_draw_weights: Mapping[bool, float] | None = None,
 ) -> tuple[ProfileComponentComparison, ...]:
-    """Compute paired per-component differences from aligned raw trials."""
+    """Compute paired components using a declared play/draw population."""
     left = [list(rows) for rows in left_trials]
     right = [list(rows) for rows in right_trials]
     if len(left) != len(right) or not left:
@@ -311,7 +343,15 @@ def compare_profile_trials(
                 raise ValueError("profile trial identities are not paired")
             left_obs.append(TrialObservation(*lkey, _trial_component_value(component, lvalid), candidate="left"))
             right_obs.append(TrialObservation(*rkey, _trial_component_value(component, rvalid), candidate="right"))
-        estimate = paired_difference(left_obs, right_obs, confidence_z)
+        estimate = (
+            paired_difference(left_obs, right_obs, confidence_z)
+            if play_draw_weights is None
+            else stratified_paired_difference(
+                left_obs, right_obs,
+                on_play_weights=play_draw_weights,
+                confidence_z=confidence_z,
+            )
+        )
         sign = 1.0 if component["direction"] == "higher" else -1.0
         low = estimate.confidence_low * sign
         high = estimate.confidence_high * sign
