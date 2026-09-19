@@ -8,6 +8,8 @@ from math import isfinite
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from .statistics import PairedEstimate
+
 
 EVENT_FIELDS = [
     "candidate",
@@ -333,3 +335,74 @@ def pareto_dominates(left: dict[str, float], right: dict[str, float], metrics: I
 
 def profile_regret(values: dict[str, float], best_by_profile: dict[str, float]) -> dict[str, float]:
     return {profile: best_by_profile[profile] - value for profile, value in values.items()}
+
+
+@dataclass(frozen=True)
+class RegretEstimate:
+    direction: str
+    point_regret: float
+    confidence_low: float
+    confidence_high: float
+    unresolved: bool
+
+
+def uncertainty_aware_frontier(
+    candidate_ids: Iterable[str],
+    pairwise_evidence: Mapping[tuple[str, str], Mapping[str, MetricEvidence]],
+) -> tuple[str, ...]:
+    """Return candidates not demonstrably dominated under paired evidence.
+
+    pairwise_evidence[(left, right)] contains left-minus-right evidence.
+    Missing comparisons are unresolved and therefore cannot eliminate.
+    """
+    candidates = tuple(dict.fromkeys(str(candidate) for candidate in candidate_ids))
+    eliminated: set[str] = set()
+    for left in candidates:
+        for right in candidates:
+            if left == right or right in eliminated:
+                continue
+            evidence = pairwise_evidence.get((left, right))
+            if evidence is None:
+                continue
+            if uncertainty_aware_dominance(evidence).status == "dominates":
+                eliminated.add(right)
+    return tuple(candidate for candidate in candidates if candidate not in eliminated)
+
+
+def uncertainty_aware_regret(
+    candidate_minus_best: PairedEstimate,
+    *,
+    direction: str,
+) -> RegretEstimate:
+    """Convert a paired candidate-minus-best interval into regret.
+
+    Higher-is-better regret is best-candidate; lower-is-better regret is
+    candidate-best.  If the interval crosses zero the candidate remains
+    unresolved with respect to zero regret.
+    """
+    if direction not in {"higher", "lower"}:
+        raise ValueError("regret direction must be higher or lower")
+    values = (
+        candidate_minus_best.mean_difference,
+        candidate_minus_best.confidence_low,
+        candidate_minus_best.confidence_high,
+    )
+    if any(not isfinite(float(value)) for value in values):
+        raise ValueError("regret interval must be finite")
+    if candidate_minus_best.confidence_low > candidate_minus_best.confidence_high:
+        raise ValueError("regret interval is reversed")
+    if direction == "higher":
+        point = -candidate_minus_best.mean_difference
+        low = -candidate_minus_best.confidence_high
+        high = -candidate_minus_best.confidence_low
+    else:
+        point = candidate_minus_best.mean_difference
+        low = candidate_minus_best.confidence_low
+        high = candidate_minus_best.confidence_high
+    return RegretEstimate(
+        direction=direction,
+        point_regret=max(0.0, point),
+        confidence_low=max(0.0, low),
+        confidence_high=max(0.0, high),
+        unresolved=(low <= 0.0 <= high),
+    )
