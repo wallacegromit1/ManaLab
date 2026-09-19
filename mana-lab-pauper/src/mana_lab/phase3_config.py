@@ -90,7 +90,12 @@ def _walk_for_placeholders(value: Any, path: str = "config") -> list[str]:
     return failures
 
 
-def validate_phase3_config(config: Mapping[str, Any], root: str | Path) -> None:
+def validate_phase3_config(
+    config: Mapping[str, Any],
+    root: str | Path,
+    *,
+    validate_control: bool = True,
+) -> None:
     root = Path(root).resolve()
     failures = _walk_for_placeholders(config)
     if failures:
@@ -102,10 +107,17 @@ def validate_phase3_config(config: Mapping[str, Any], root: str | Path) -> None:
     if parent.get("sha256") != RUN_E_SHA256:
         raise ValueError("parent archive hash does not match frozen Run E authority")
     control = config["phase_control"]
-    if control["authorization_status"] != "PENDING_INDEPENDENT_RUN_H":
-        raise ValueError("Run G config must remain pending independent authorization")
-    if control["optimization_execution_allowed"] is not False:
-        raise ValueError("Run G must not authorize optimization execution")
+    required_control = {
+        "authorization_status", "optimization_execution_allowed",
+        "real_candidate_performance_allowed_in_readiness", "readiness_mode",
+    }
+    if required_control - set(control):
+        raise ValueError("phase-control metadata is incomplete")
+    if validate_control:
+        if control["authorization_status"] != "PENDING_INDEPENDENT_RUN_H":
+            raise ValueError("Run G config must remain pending independent authorization")
+        if control["optimization_execution_allowed"] is not False:
+            raise ValueError("Run G must not authorize optimization execution")
     if list(config["pipeline"]["stages"]) != REQUIRED_STAGES:
         raise ValueError("pipeline stages are missing or out of order")
 
