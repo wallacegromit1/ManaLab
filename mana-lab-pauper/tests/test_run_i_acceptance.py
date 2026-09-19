@@ -19,6 +19,7 @@ from mana_lab.phase3_model_risk import (
 )
 from mana_lab.phase3_depth import planner_depth_audit
 from mana_lab.phase3_policies import validate_policy_freeze
+from mana_lab.phase3_stage_schemas import validate_stage_envelope
 from mana_lab.statistics import (
     PairedEstimate, TrialObservation, adaptive_paired_difference,
     holm_family, paired_difference,
@@ -330,6 +331,41 @@ class RunIAcceptanceTests(unittest.TestCase):
         self.assertGreater(
             audit["boundary_stress"]["shallow"]["stopping_reasons"]["depth_limit"], 0
         )
+
+    def test_typed_stage_contract_rejects_forged_payload(self):
+        from mana_lab.phase3_config import canonical_hash
+        valid = {
+            "stage": "04_medium", "status": "PASS",
+            "mode": "RUN_I_PRODUCTION_MACHINERY_VALIDATION",
+            "stage_schema_version": "mana-lab-run-i-stage-v1",
+            "scientific_config_hash": "1" * 64,
+            "code_tree_hash": "2" * 64,
+            "policy_identity_hash": "3" * 64,
+            "seed_identity_hash": "4" * 64,
+            "prerequisite_hash": "5" * 64,
+            "control_metadata": {
+                "optimization_execution_allowed": False,
+                "authorization_status": "PENDING_INDEPENDENT_RUN_H",
+            },
+            "ranking_produced": False,
+            "recommendation_produced": False,
+            "payload": {
+                "candidate_payload_hash": "6" * 64,
+                "all_candidate_identities_carried": 296706,
+                "protected_candidate_ids": [f"protected-{n}" for n in range(57)],
+                "selection_seed": 7,
+                "paired_keys_verified": ["scenario", "replicate", "trial", "on_play"],
+                "real_candidate_performance_screened": False,
+            },
+        }
+        valid["artifact_content_hash"] = canonical_hash(valid)
+        validate_stage_envelope("04_medium", valid)
+        tampered = copy.deepcopy(valid)
+        del tampered["payload"]["candidate_payload_hash"]
+        tampered.pop("artifact_content_hash")
+        tampered["artifact_content_hash"] = canonical_hash(tampered)
+        with self.assertRaisesRegex(ValueError, "candidate_payload_hash"):
+            validate_stage_envelope("04_medium", tampered)
 
     def test_forged_prerequisite_rejected(self):
         with tempfile.TemporaryDirectory() as output:
