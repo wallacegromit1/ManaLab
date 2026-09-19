@@ -776,6 +776,7 @@ def simulate_trial(
     on_play: bool,
     mulligan_policy: str,
     sequencing_policy: str,
+    scry_policy_name: str | None = None,
     audit_full_action_policy: bool = True,
     information_policy_name: str = BASELINE_INFORMATION_POLICY,
     reserve_policy_name: str = BASELINE_RESERVE_POLICY,
@@ -797,7 +798,11 @@ def simulate_trial(
         trial_id=trial, scenario_id=scenario_label, replicate_id=seed,
     )
     action_policy = BASELINE_ACTION_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_ACTION_POLICY
-    scry_policy = BASELINE_SCRY_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_SCRY_POLICY
+    # Legacy callers may omit the scry axis, but Phase 3 callers pass it
+    # independently. Sequencing must never silently select a different scry
+    # policy when an explicit scry identity is supplied.
+    if scry_policy_name is None:
+        scry_policy_name = BASELINE_SCRY_POLICY if sequencing_policy == BASELINE_LAND_POLICY else ALTERNATE_SCRY_POLICY
     state.log(
         "opening_hand", opening_land_count=raw_lands, keep_size=len(result.hand), mulligans=result.mulligans,
         bottomed=[card.name for card in result.bottomed],
@@ -819,7 +824,7 @@ def simulate_trial(
                 access_t2[color] = bool(find_payment_plan(state, ManaCost(colored={color: 1})))
             ub_t2 = bool(find_payment_plan(state, ManaCost(colored={"U": 1, "B": 1})))
         sequences = enumerate_action_sequences(
-            state, deck, scry_policy_name=scry_policy,
+            state, deck, scry_policy_name=scry_policy_name,
             information_policy_name=information_policy_name,
             max_depth=planner_search_depth,
         )
@@ -829,7 +834,7 @@ def simulate_trial(
             spell_plus_interaction_feasible=any(result.option.spell_executions >= 1 and result.option.reserve_preserved for result in sequences),
         )
         execute_action_policy(
-            state, deck, action_policy_name=action_policy, scry_policy_name=scry_policy,
+            state, deck, action_policy_name=action_policy, scry_policy_name=scry_policy_name,
             information_policy_name=information_policy_name, reserve_policy_name=reserve_policy_name,
             search_depth=planner_search_depth, max_actions=planner_max_actions,
         )
@@ -858,8 +863,22 @@ def simulate_trial(
         state.end_phase("end")
 
     cast_names = [event["card"] for event in state.events if event["event"] == "spell_cast"]
+    executed_identity = {
+        "candidate": candidate_label,
+        "mulligan_policy": mulligan_policy,
+        "sequencing_policy": sequencing_policy,
+        "scry_policy": scry_policy_name,
+        "information_policy": information_policy_name,
+        "reserve_policy": reserve_policy_name,
+        "planner_search_depth": int(planner_search_depth),
+        "planner_max_actions": int(planner_max_actions),
+    }
+    for event in state.events:
+        event.update(executed_identity)
+
     row = {
         "candidate": candidate_label, "scenario": scenario_label, "replicate": seed, "trial": trial,
+        **executed_identity,
         "pairing_id": f"scenario={scenario_label}|replicate={seed}|trial={trial}|on_play={int(on_play)}",
         "on_play": on_play,
         "raw_opening_lands": raw_lands, "raw_W": raw_presence["W"], "raw_U": raw_presence["U"],
