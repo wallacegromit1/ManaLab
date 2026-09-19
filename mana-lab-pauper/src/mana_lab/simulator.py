@@ -135,6 +135,7 @@ class PlannerAction:
     payment: PaymentPlan | None = None
     target_uid: str | None = None
     sacrifice_uid: str | None = None
+    discard_uid: str | None = None
     reveals_information: bool = False
     due: bool = False
     hard_deadline: bool = False
@@ -170,6 +171,27 @@ def generate_legal_actions(state: GameState, deck: DeckSpec, *, include_land_act
                 by_name.setdefault(card.name, card)
         for name, card in sorted(by_name.items()):
             actions.append(PlannerAction("land", f"Play {name}", ("land", name), card_uid=card.uid))
+
+    # Blood has no opponent-dependent target, so its activation is a real
+    # production planner option.  Hidden draw identity remains behind the same
+    # causal information boundary as spell draw effects.
+    bloods = _target_variants([
+        permanent for permanent in state.battlefield
+        if permanent.card.name == "Blood" and not permanent.tapped
+    ])
+    discard_by_name: dict[str, PhysicalCard] = {}
+    for discard in sorted(state.hand, key=lambda c: (c.name, c.uid)):
+        discard_by_name.setdefault(discard.name, discard)
+    blood_plans = enumerate_payment_plans(state, ManaCost(generic=1))
+    for blood_permanent in bloods:
+        for discard in discard_by_name.values():
+            for plan in blood_plans:
+                actions.append(PlannerAction(
+                    "blood_activation", "Activate Blood",
+                    ("activate", "Blood", plan.canonical_key, "discard", discard.name),
+                    payment=plan, target_uid=blood_permanent.card.uid,
+                    discard_uid=discard.uid, reveals_information=True,
+                ))
 
     by_name: dict[str, PhysicalCard] = {}
     for card in sorted(state.hand, key=lambda c: (c.name, c.uid)):
@@ -536,6 +558,29 @@ def apply_planner_action(
             next(p for p in probe.battlefield if p.card.uid == permanent.card.uid).tapped = False
             blocked = _due_castable_count(probe, deck) > actual
         state.log("etb_tempo", card=card.name, entered_tapped=permanent.tapped, blocked_action=blocked, slack_window=not blocked)
+        return
+
+    if action.kind == "blood_activation":
+        blood_permanent = next(
+            (p for p in state.battlefield if p.card.uid == action.target_uid and p.card.name == "Blood"),
+            None,
+        )
+        discard = next((card for card in state.hand if card.uid == action.discard_uid), None)
+        if blood_permanent is None or blood_permanent.tapped or discard is None or action.payment is None:
+            raise ValueError("Blood activation resources are no longer available")
+        before_artifacts = state.artifact_count()
+        before_metalcraft = state.metalcraft()
+        execute_payment(state, remap_payment_plan(state, action.payment))
+        state.hand.remove(discard)
+        state.graveyard.append(discard)
+        leave_battlefield(state, blood_permanent, "graveyard", reason="Blood activation")
+        _resolve_or_defer_draw(state, 1, "Blood activation", reveal_information)
+        state.log(
+            "blood_activation", discarded=discard.name, discarded_uid=discard.uid,
+            artifact_count_before=before_artifacts, artifact_count_after=state.artifact_count(),
+            metalcraft_before=before_metalcraft, metalcraft_after=state.metalcraft(),
+            mana_paid=1, event_role="option_execution",
+        )
         return
 
     card = next(card for card in state.hand if card.uid == action.card_uid)
