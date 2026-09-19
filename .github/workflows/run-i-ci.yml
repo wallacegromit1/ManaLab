@@ -1,0 +1,43 @@
+name: Run I remediation CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip PyYAML
+      - name: Unit tests
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -m unittest discover -s tests -v
+      - name: Run G readiness regression
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python -m mana_lab.phase3_readiness --root . --config RUN_G_PHASE3_FROZEN_CONFIG.yaml --parent-zip ../archives/Mana_Lab_Pauper_v1_Run_E.zip
+      - name: Candidate invariants
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          from mana_lab.cards import load_deck
+          from mana_lab.candidates import candidate_count_report
+          d=load_deck('configs/decks/Strixpatch_Affinity_v1.3.deck.yaml')
+          print(candidate_count_report(d))
+          PY
+      - name: Archive hashes
+        run: sha256sum archives/Mana_Lab_Pauper_v1_Run_E.zip archives/Mana_Lab_Pauper_v1_Run_G.zip
