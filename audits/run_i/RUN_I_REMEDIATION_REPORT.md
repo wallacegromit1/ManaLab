@@ -24,7 +24,9 @@ Root cause: Run G had a synthetic-only stage graph and weak prerequisites.
 Implementation: `phase3_pipeline.py`, `phase3_config.py`,
 `phase3_stage_schemas.py`; stage envelope/type validation, stage-chain hashes,
 atomic immutable writes, fully persisted legal candidate identities, exact
-C0 + 56 boundary protection and immutable event-payload identity.
+C0 + 56 boundary protection and immutable event-payload identity. The
+mulligan draw seed derivation now matches the declared purpose/scenario/
+replicate/trial/attempt hash without changing frozen seed values.
 The candidate-neutral C0-equivalent fixtures execute the real
 `simulate_trial -> aggregate_trial_events -> paired_difference` path.
 Pending: stage 04 medium, 05 finalist selection, 06 fresh candidate
