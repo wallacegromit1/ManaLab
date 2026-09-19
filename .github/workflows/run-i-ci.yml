@@ -46,6 +46,59 @@ jobs:
           PYTHONPATH: src
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -m unittest discover -s tests -v
+      - name: Candidate-neutral production machinery reproducibility
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python - <<'PY'
+          import json, tempfile
+          from pathlib import Path
+          from mana_lab.phase3_config import load_phase3_config
+          from mana_lab.phase3_pipeline import Phase3Pipeline
+
+          root = Path('.').resolve()
+          config = load_phase3_config(root / 'RUN_G_PHASE3_FROZEN_CONFIG.yaml')
+          with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
+              p1 = Phase3Pipeline(root, config, first)
+              a = p1.run_real()
+              restart = p1.run_real()
+              p2 = Phase3Pipeline(root, config, second)
+              b = p2.run_real()
+              assert a == restart
+              assert a == b
+              assert not a['ranking_produced']
+              assert not a['recommendation_produced']
+              print('RUN_I_PIPELINE_MANIFEST=' + json.dumps(a, sort_keys=True))
+          PY
+      - name: Run I provenance identities
+        working-directory: mana-lab-pauper
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from mana_lab.phase3_config import load_phase3_config, scientific_config_hash
+          from mana_lab.phase3_policies import policy_hashes
+          from mana_lab.provenance import content_tree_hash, source_manifest
+          from mana_lab.phase3_pipeline import Phase3Pipeline
+          import tempfile
+
+          root = Path('.').resolve()
+          cfg = load_phase3_config(root / 'RUN_G_PHASE3_FROZEN_CONFIG.yaml')
+          with tempfile.TemporaryDirectory() as out:
+              p = Phase3Pipeline(root, cfg, out)
+              print('RUN_I_PROVENANCE=' + json.dumps({
+                  'code_tree_sha256': content_tree_hash(source_manifest(root)),
+                  'frozen_config_file_sha256': cfg['_config_hash'],
+                  'scientific_config_sha256': scientific_config_hash(cfg),
+                  'policy_hashes': policy_hashes(),
+                  'seed_identity_sha256': p.seed_identity,
+                  'stage_schema_version': 'mana-lab-run-i-stage-v1',
+              }, sort_keys=True))
+          PY
       - name: Candidate invariants
         working-directory: mana-lab-pauper
         env:
