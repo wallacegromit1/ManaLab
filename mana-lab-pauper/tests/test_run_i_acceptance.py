@@ -25,6 +25,7 @@ from mana_lab.statistics import (
 )
 from mana_lab.cards import load_deck
 from mana_lab.state import GameState, Permanent, make_card
+from mana_lab.simulator import simulate_trial
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -211,6 +212,45 @@ class RunIAcceptanceTests(unittest.TestCase):
                 tapped=False, land_spec=deck.land_by_name[name],
             ))
         return state
+
+    def test_policy_axes_vary_independently_in_production(self):
+        deck = load_deck(ROOT / "configs/decks/Strixpatch_Affinity_v1.3.deck.yaml")
+        lands = dict(deck.current_mana_base)
+        baseline = {
+            "mulligan_policy": "baseline_functional_london",
+            "sequencing_policy": "baseline_hand_demand",
+            "scry_policy_name": "boulder_scry_baseline",
+            "information_policy_name": "baseline_information_value",
+            "reserve_policy_name": "reserve_one_reply",
+        }
+        variants = {
+            "mulligan_policy": "alternate_landcount_london",
+            "sequencing_policy": "alternate_tempo_untapped",
+            "scry_policy_name": "boulder_scry_alternate",
+            "information_policy_name": "conservative_information_value",
+            "reserve_policy_name": "tap_out_development",
+        }
+        event_fields = {
+            "mulligan_policy": "mulligan_policy",
+            "sequencing_policy": "sequencing_policy",
+            "scry_policy_name": "scry_policy",
+            "information_policy_name": "information_policy",
+            "reserve_policy_name": "reserve_policy",
+        }
+        for changed_axis, changed_value in variants.items():
+            kwargs = dict(baseline)
+            kwargs[changed_axis] = changed_value
+            _, events = simulate_trial(
+                deck, lands, candidate_label="POLICY_AXIS_FIXTURE",
+                scenario_label=f"axis-{changed_axis}", trial=0, seed=99173,
+                on_play=True, planner_search_depth=3, planner_max_actions=4,
+                **kwargs,
+            )
+            first = events[0]
+            for axis, base_value in baseline.items():
+                field = event_fields[axis]
+                expected = changed_value if axis == changed_axis else base_value
+                self.assertEqual(first[field], expected, (changed_axis, axis))
 
     def test_model_risk_resource_and_target_axes_are_executable(self):
         deck = load_deck(ROOT / "configs/decks/Strixpatch_Affinity_v1.3.deck.yaml")
