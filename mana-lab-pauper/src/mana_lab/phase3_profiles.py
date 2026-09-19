@@ -141,6 +141,16 @@ def _trial_component_value(component: Mapping[str, Any], events: Iterable[Mappin
     rows = validate_event_stream(events)
     turns = set(int(turn) for turn in component["turns"])
     metric = str(component["metric"])
+    declared_scenarios = set(str(value) for value in component["scenarios"])
+    actual_scenario = str(rows[0]["scenario"])
+    scenario_allowed = (
+        actual_scenario in declared_scenarios
+        or ("weighted_primary" in declared_scenarios and actual_scenario == "baseline_primary")
+    )
+    if not scenario_allowed:
+        raise ValueError(
+            f"profile component {metric} excludes scenario {actual_scenario}"
+        )
 
     snapshots = [
         row for row in rows
