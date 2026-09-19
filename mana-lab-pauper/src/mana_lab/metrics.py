@@ -4,6 +4,7 @@ import csv
 import gzip
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -257,9 +258,15 @@ def uncertainty_aware_dominance(evidence: Mapping[str, MetricEvidence]) -> Domin
     better: list[str] = []
     unresolved: list[str] = []
     worse: list[str] = []
+    equivalent: list[str] = []
     for name, item in evidence.items():
         if item.direction not in {"higher", "lower"}:
             raise ValueError(f"metric {name} has invalid direction {item.direction}")
+        numeric = [item.difference, item.no_worse_tolerance, item.materiality_tolerance]
+        if any(not isfinite(float(value)) for value in numeric):
+            raise ValueError(f"metric {name} contains a non-finite estimate/tolerance")
+        if item.no_worse_tolerance < 0 or item.materiality_tolerance < 0:
+            raise ValueError(f"metric {name} tolerances must be non-negative")
         sign = 1.0 if item.direction == "higher" else -1.0
         estimate = sign * item.difference
         if item.exact:
@@ -268,15 +275,25 @@ def uncertainty_aware_dominance(evidence: Mapping[str, MetricEvidence]) -> Domin
             if item.confidence_low is None or item.confidence_high is None:
                 unresolved.append(name)
                 continue
-            raw_low = sign * item.confidence_low
-            raw_high = sign * item.confidence_high
-            low, high = min(raw_low, raw_high), max(raw_low, raw_high)
+            if not isfinite(float(item.confidence_low)) or not isfinite(float(item.confidence_high)):
+                raise ValueError(f"metric {name} confidence interval must be finite")
+            if item.confidence_low > item.confidence_high:
+                raise ValueError(f"metric {name} confidence interval is reversed")
+            if sign > 0:
+                low, high = float(item.confidence_low), float(item.confidence_high)
+            else:
+                low, high = -float(item.confidence_high), -float(item.confidence_low)
         if high < -item.no_worse_tolerance:
             worse.append(name)
         elif low >= -item.no_worse_tolerance:
             no_worse.append(name)
             if low > item.materiality_tolerance:
                 better.append(name)
+            elif low >= -item.materiality_tolerance and high <= item.materiality_tolerance:
+                equivalent.append(name)
+            else:
+                # One-sided no-worse evidence is not two-sided equivalence.
+                unresolved.append(name)
         else:
             unresolved.append(name)
 
@@ -286,8 +303,10 @@ def uncertainty_aware_dominance(evidence: Mapping[str, MetricEvidence]) -> Domin
         status = "unresolved"
     elif better:
         status = "dominates"
-    else:
+    elif len(equivalent) == len(evidence):
         status = "practically_equivalent"
+    else:
+        status = "unresolved"
     return DominanceResult(status, tuple(no_worse), tuple(better), tuple(unresolved), tuple(worse))
 
 
