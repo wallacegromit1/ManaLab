@@ -229,3 +229,51 @@ def adaptive_paired_difference(
         family_size=family_size,
     )
     return paired_difference(left, right, confidence_z=z)
+
+
+def stratified_paired_difference(
+    left: Iterable[TrialObservation | Mapping[str, Any]],
+    right: Iterable[TrialObservation | Mapping[str, Any]],
+    *,
+    on_play_weights: Mapping[bool, float],
+    confidence_z: float = 1.96,
+) -> PairedEstimate:
+    """Paired estimate with an explicitly registered play/draw population.
+
+    Each stratum contributes its declared population weight, regardless of
+    its trial count. Pairing remains key-exact and each positive-weight stratum
+    needs at least two independent trial pairs to estimate sampling variance.
+    Normal intervals remain asymptotic and require separate model audit.
+    """
+    left_rows = [_coerce_observation(value) for value in left]
+    right_rows = [_coerce_observation(value) for value in right]
+    paired_difference(left_rows, right_rows, confidence_z=confidence_z)
+    if not on_play_weights or any(type(key) is not bool for key in on_play_weights):
+        raise ValueError("play/draw weights require boolean population keys")
+    weights = {key: float(value) for key, value in on_play_weights.items()}
+    if any(not isfinite(value) or value <= 0 for value in weights.values()):
+        raise ValueError("play/draw weights must be finite and positive")
+    if abs(sum(weights.values()) - 1.0) > 1e-10:
+        raise ValueError("play/draw weights must sum to one")
+    if not isfinite(confidence_z) or confidence_z < 0:
+        raise ValueError("confidence_z must be finite and nonnegative")
+    strata: dict[bool, list[float]] = {}
+    for a, b in zip(left_rows, right_rows):
+        if a.on_play not in weights:
+            raise ValueError("trial play/draw stratum excluded by declared population")
+        strata.setdefault(a.on_play, []).append(a.value - b.value)
+    if set(strata) != set(weights):
+        raise ValueError("declared play/draw population stratum is missing")
+    if any(len(values) < 2 for values in strata.values()):
+        raise ValueError("paired stratum needs at least two observations")
+    mean = sum(weights[key] * fmean(values) for key, values in strata.items())
+    standard_error = sqrt(sum(
+        weights[key] ** 2 * stdev(values) ** 2 / len(values)
+        for key, values in strata.items()
+    ))
+    return PairedEstimate(
+        len(left_rows), mean, standard_error,
+        mean - confidence_z * standard_error,
+        mean + confidence_z * standard_error,
+        "keyed_stratified_play_draw",
+    )
