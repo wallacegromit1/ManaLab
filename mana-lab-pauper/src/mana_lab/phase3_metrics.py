@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from statistics import fmean
 from typing import Any, Iterable, Mapping
 
 from .metrics import PHASE3_METRIC_REGISTRY
+from .statistics import TrialObservation, paired_difference
 
 
 # Every registry metric has a predeclared aggregation family.  This table is
@@ -174,12 +176,18 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
             return True
         return False
 
-    cryogen_draws_by = lambda deadline: [
-        event for event in rows
-        if event.get("event") == "draw"
-        and "Cryogen" in str(event.get("reason", event.get("source", "")))
-        and 0 < int(event.get("turn", 0)) <= deadline
-    ]
+    def cryogen_draws_by(deadline: int, source_uid: str | None = None) -> list[dict[str, Any]]:
+        result = [
+            event for event in rows
+            if event.get("event") == "draw"
+            and "Cryogen" in str(event.get("reason", event.get("source", "")))
+            and 0 < int(event.get("turn", 0)) <= deadline
+        ]
+        if source_uid is not None:
+            linked = [event for event in result if event.get("source_uid") == source_uid]
+            if linked:
+                return linked
+        return result
     hawk_returns_by_t3 = [
         event for event in rows
         if event.get("event") == "glint_hawk_return"
@@ -200,7 +208,11 @@ def evaluate_critical_sequences(events: Iterable[Mapping[str, Any]]) -> dict[str
     }
     return {
         "T2_STRIX_UB": resolved_by("Baleful Strix", 2),
-        "T2_CRYOGEN": resolved_by("Cryogen Relic", 2) and len(cryogen_draws_by(2)) >= 1,
+        "T2_CRYOGEN": any(
+            int(event.get("turn", 0)) <= 2
+            and len(cryogen_draws_by(2, str(event.get("uid")) if event.get("uid") is not None else None)) >= 1
+            for event in functional if event.get("card") == "Cryogen Relic"
+        ),
         "T2_THOUGHTCAST": resolved_by("Thoughtcast", 2),
         "T2_FAMILIAR": resolved_by("Refurbished Familiar", 2),
         "T2_MONITOR": resolved_by("Utrom Monitor", 2),
@@ -287,3 +299,141 @@ def provenance_row(
         "value": float(value),
     }
 
+
+
+PRODUCTION_IDENTITY_FIELDS = (
+    "candidate", "scenario", "replicate", "on_play",
+    "mulligan_policy", "sequencing_policy", "scry_policy",
+    "information_policy", "reserve_policy",
+    "planner_search_depth", "planner_max_actions",
+)
+
+
+def validate_production_event_stream(events: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    rows = validate_event_stream(events)
+    if not rows:
+        raise ValueError("production event stream is empty")
+    identities: set[tuple[Any, ...]] = set()
+    for row in rows:
+        missing = [field for field in PRODUCTION_IDENTITY_FIELDS if field not in row]
+        if missing:
+            raise ValueError(f"production event missing identity fields: {missing}")
+        identities.add(tuple(row[field] for field in PRODUCTION_IDENTITY_FIELDS))
+    if len(identities) != 1:
+        raise ValueError("production event stream mixes candidate/policy/scenario identity")
+    return rows
+
+
+def denominator_state(*, denominator: int, applicable: bool = True, complete: bool = True) -> str:
+    if not applicable:
+        return "NOT_APPLICABLE"
+    if not complete:
+        return "INCOMPLETE"
+    if denominator == 0:
+        return "ABSENT"
+    if denominator < 0:
+        raise ValueError("denominator cannot be negative")
+    return "OBSERVED"
+
+
+def build_candidate_trial_table(
+    trial_streams: Iterable[Iterable[Mapping[str, Any]]],
+) -> list[dict[str, Any]]:
+    table: list[dict[str, Any]] = []
+    for stream in trial_streams:
+        rows = validate_production_event_stream(stream)
+        aggregate = aggregate_trial_events(rows)
+        identity = rows[0]
+        table.append({
+            **{field: identity[field] for field in PRODUCTION_IDENTITY_FIELDS},
+            "trial": int(identity.get("trial_id", identity.get("trial"))),
+            **aggregate,
+            "spell_denominator_state": denominator_state(
+                denominator=int(aggregate["spell_opportunities"])
+            ),
+        })
+    return table
+
+
+def build_spell_table(
+    trial_streams: Iterable[Iterable[Mapping[str, Any]]],
+) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    for stream in trial_streams:
+        rows = validate_production_event_stream(stream)
+        identity = rows[0]
+        for row in rows:
+            if row.get("event") != "spell_window":
+                continue
+            output.append({
+                **{field: identity[field] for field in PRODUCTION_IDENTITY_FIELDS},
+                "trial": int(identity.get("trial_id", identity.get("trial"))),
+                "event_id": int(row["event_id"]),
+                "opportunity_id": row.get("opportunity_id"),
+                "card": row.get("card"),
+                "card_instance": row.get("card_instance", row.get("uid")),
+                "profile": row.get("profile"),
+                "turn": int(row.get("turn", 0)),
+                "timing": row.get("timing"),
+                "castable": bool(row.get("castable")),
+                "failure_reason": row.get("failure_reason"),
+                "weight": float(row.get("weight", 1.0)),
+            })
+    return output
+
+
+def build_paired_difference_table(
+    candidate_trial_rows: Iterable[Mapping[str, Any]],
+    *,
+    metric: str,
+    left_candidate: str,
+    right_candidate: str,
+    confidence_z: float = 1.96,
+) -> dict[str, Any]:
+    rows = [dict(row) for row in candidate_trial_rows]
+    left = [
+        TrialObservation(
+            str(row["scenario"]), row["replicate"], int(row["trial"]),
+            bool(row["on_play"]), float(row[metric]), candidate=left_candidate,
+        )
+        for row in rows if row["candidate"] == left_candidate
+    ]
+    right = [
+        TrialObservation(
+            str(row["scenario"]), row["replicate"], int(row["trial"]),
+            bool(row["on_play"]), float(row[metric]), candidate=right_candidate,
+        )
+        for row in rows if row["candidate"] == right_candidate
+    ]
+    estimate = paired_difference(left, right, confidence_z)
+    return {
+        "left_candidate": left_candidate,
+        "right_candidate": right_candidate,
+        "metric": metric,
+        "trials": estimate.trials,
+        "mean_difference": estimate.mean_difference,
+        "standard_error": estimate.standard_error,
+        "confidence_low": estimate.confidence_low,
+        "confidence_high": estimate.confidence_high,
+        "pairing_mode": estimate.pairing_mode,
+    }
+
+
+def build_robustness_table(
+    candidate_trial_rows: Iterable[Mapping[str, Any]],
+    *,
+    metric: str,
+) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str], list[float]] = defaultdict(list)
+    for row in candidate_trial_rows:
+        grouped[(str(row["candidate"]), str(row["scenario"]))].append(float(row[metric]))
+    return [
+        {
+            "candidate": candidate,
+            "scenario": scenario,
+            "metric": metric,
+            "trials": len(values),
+            "mean": fmean(values),
+        }
+        for (candidate, scenario), values in sorted(grouped.items())
+    ]
