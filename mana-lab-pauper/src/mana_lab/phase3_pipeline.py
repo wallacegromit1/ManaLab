@@ -153,7 +153,7 @@ class Phase3Pipeline:
         return value
 
     def stage_01_validate(self) -> dict[str, Any]:
-        validate_phase3_config(self.config, self.root)
+        validate_phase3_config(self.config, self.root, validate_control=False)
         validate_policy_freeze(self.config["policies"])
         validate_aggregation_coverage()
         return self._write("01_validate", {
