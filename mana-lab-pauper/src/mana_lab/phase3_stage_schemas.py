@@ -68,6 +68,7 @@ STAGE_REQUIRED: dict[str, dict[str, type]] = {
         "candidate_neutral_pairing": dict,
         "raw_event_payload": dict,
         "trace_derived_tables": dict,
+        "screening_ledger_probe": dict,
         "real_candidate_performance_screened": bool,
     },
     "04_medium": {
@@ -182,5 +183,17 @@ def validate_stage_envelope(stage: str, value: Mapping[str, Any]) -> None:
                 raise ValueError(f"invalid raw event contract: {field}")
         if not SHA256.fullmatch(record["content_hash"]) or record["trial_stream_count"] <= 0:
             raise ValueError("invalid raw event hash/count")
+    if stage == "03_screen":
+        ledger = payload["screening_ledger_probe"]
+        if (
+            ledger.get("family_id") != "run_i_candidate_neutral_machinery"
+            or ledger.get("registered_claim_count") != 1
+            or ledger.get("history_rows") != 1
+            or ledger.get("status") != "RETAIN_INSUFFICIENT_EVIDENCE"
+            or ledger.get("real_candidate_evidence") is not False
+            or not isinstance(ledger.get("audit_hash"), str)
+            or not SHA256.fullmatch(ledger["audit_hash"])
+        ):
+            raise ValueError("invalid candidate-neutral screening ledger proof")
     if stage == "09_report" and not payload["attestation"].startswith("NO REAL CANDIDATE PERFORMANCE RANKING"):
         raise ValueError("missing no-optimization attestation")
