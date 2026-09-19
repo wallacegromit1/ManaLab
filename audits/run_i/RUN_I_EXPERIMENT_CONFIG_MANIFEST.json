@@ -1,0 +1,58 @@
+{
+  "schema_version": "mana-lab-run-i-config-lineage-v1",
+  "scientific_config_path": "mana-lab-pauper/RUN_G_PHASE3_FROZEN_CONFIG.yaml",
+  "scientific_config_unchanged_from_run_g": true,
+  "config_schema_version": "mana-lab-phase3-run-g-v1",
+  "deck_path": "mana-lab-pauper/configs/decks/Strixpatch_Affinity_v1.3.deck.yaml",
+  "deck_sha256": "e0e18170cc3d362ae697726115381dcf3ec6ad3a4140ce46b388269ca0f9303a",
+  "candidate_set_sha256": "d9bff0652d2d449f761205575b63af0db5205c3354705c82302fa8b649de78e3",
+  "full_configured_trial_plan": {
+    "screening_per_candidate": 512,
+    "medium_per_candidate": 8192,
+    "fresh_validation_per_candidate": 32768,
+    "adaptive_batch": 16384,
+    "adaptive_cap": 131072,
+    "replicate_count": 4
+  },
+  "run_i_trial_execution_note": "full configured candidate trial budgets NOT RUN in readiness remediation",
+  "planner": {
+    "depth": 8,
+    "max_actions_per_main": 12,
+    "depth_sensitivity": [
+      7,
+      8,
+      9
+    ]
+  },
+  "primary_play_draw": {
+    "on_play": 0.5,
+    "on_draw": 0.5
+  },
+  "randomness": {
+    "selection_seed": 2026091701,
+    "validation_seed": 2026091702,
+    "replicate_seeds": [
+      2026091703,
+      2026091704,
+      2026091705,
+      2026091706
+    ],
+    "pairing_keys": [
+      "scenario",
+      "replicate",
+      "trial",
+      "on_play"
+    ]
+  },
+  "named_profiles": [
+    "balanced",
+    "tempo_sensitive",
+    "color_consistency",
+    "interaction_sensitive",
+    "double_spell_sensitive",
+    "affinity_value_engine"
+  ],
+  "control_metadata_separate_from_scientific_hash": true,
+  "phase3_authorized": false,
+  "real_candidate_performance_screened": false
+}
