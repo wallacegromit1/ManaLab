@@ -433,11 +433,13 @@ class Phase3Pipeline:
         for method in methods:
             value = method()
             stage_hashes[value["stage"]] = value["artifact_content_hash"]
+        report_stage = self._read_prerequisite("09_report")
         manifest = {
             "status": "PASS",
             "mode": "RUN_I_PRODUCTION_MACHINERY_VALIDATION",
             **self._lineage(),
             "stage_hashes": stage_hashes,
+            "output_schema_fields": report_stage["payload"]["output_schema_fields"],
             "ranking_produced": False,
             "recommendation_produced": False,
         }
