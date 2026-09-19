@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from math import comb, sqrt
-from statistics import fmean, stdev
+from math import comb, erf, isfinite, sqrt
+from statistics import NormalDist, fmean, stdev
 from typing import Any, Iterable, Mapping
 
 
@@ -76,7 +76,7 @@ def _coerce_observation(value: TrialObservation | Mapping[str, Any]) -> TrialObs
     missing = required - set(value)
     if missing:
         raise ValueError(f"paired observation missing keys: {sorted(missing)}")
-    return TrialObservation(
+    observation = TrialObservation(
         scenario=str(value["scenario"]),
         replicate=value["replicate"],
         trial=int(value["trial"]),
@@ -84,6 +84,9 @@ def _coerce_observation(value: TrialObservation | Mapping[str, Any]) -> TrialObs
         value=float(value["value"]),
         candidate=None if value.get("candidate") is None else str(value["candidate"]),
     )
+    if not isfinite(observation.value):
+        raise ValueError("paired observation value must be finite")
+    return observation
 
 
 def paired_difference(
@@ -116,6 +119,10 @@ def paired_difference(
         # analysis must pass TrialObservation records and is tested separately.
         differences = [float(a) - float(b) for a, b in zip(left_values, right_values)]  # type: ignore[arg-type]
         pairing_mode = "legacy_positional_fixture"
+    if any(not isfinite(value) for value in differences):
+        raise ValueError("paired differences must be finite")
+    if not isfinite(float(confidence_z)) or confidence_z < 0:
+        raise ValueError("confidence_z must be finite and non-negative")
     estimate = fmean(differences)
     standard_error = 0.0 if len(differences) == 1 else stdev(differences) / sqrt(len(differences))
     return PairedEstimate(
@@ -138,3 +145,87 @@ def replicate_seed(base_seed: int, replicate_id: int, purpose: str) -> int:
     """Deterministic purpose-separated seed without Python's salted hash."""
     digest = hashlib.sha256(f"{purpose}|{replicate_id}".encode()).digest()
     return base_seed + int.from_bytes(digest[:8], "big")
+
+
+@dataclass(frozen=True)
+class MultiplicityDecision:
+    comparison_id: str
+    p_value: float
+    holm_rank: int
+    adjusted_alpha: float
+    rejected: bool
+
+
+def normal_two_sided_p_value(estimate: PairedEstimate) -> float:
+    """Normal-approximation two-sided p-value for an aligned paired estimate."""
+    if estimate.trials <= 0 or not all(isfinite(v) for v in (
+        estimate.mean_difference, estimate.standard_error,
+        estimate.confidence_low, estimate.confidence_high,
+    )):
+        raise ValueError("invalid paired estimate")
+    if estimate.standard_error == 0:
+        return 0.0 if estimate.mean_difference != 0 else 1.0
+    z = abs(estimate.mean_difference / estimate.standard_error)
+    return max(0.0, min(1.0, 2.0 * (1.0 - NormalDist().cdf(z))))
+
+
+def holm_family(
+    estimates: Mapping[str, PairedEstimate],
+    *,
+    family_alpha: float,
+) -> tuple[MultiplicityDecision, ...]:
+    """Holm step-down family-wise error control over one declared family."""
+    if not estimates:
+        raise ValueError("Holm family cannot be empty")
+    if not isfinite(family_alpha) or not 0 < family_alpha < 1:
+        raise ValueError("family_alpha must be between zero and one")
+    ranked = sorted(
+        ((name, normal_two_sided_p_value(estimate)) for name, estimate in estimates.items()),
+        key=lambda item: (item[1], item[0]),
+    )
+    m = len(ranked)
+    stopped = False
+    output: list[MultiplicityDecision] = []
+    for index, (name, p_value) in enumerate(ranked, start=1):
+        alpha = family_alpha / (m - index + 1)
+        rejected = (not stopped) and p_value <= alpha
+        if not rejected:
+            stopped = True
+        output.append(MultiplicityDecision(name, p_value, index, alpha, rejected))
+    return tuple(output)
+
+
+def sequential_confidence_z(
+    *,
+    family_alpha: float,
+    maximum_looks: int,
+    family_size: int = 1,
+) -> float:
+    """Conservative always-valid planning bound via Bonferroni over looks/family.
+
+    Holm is applied within each realized comparison family; this alpha spending
+    protects optional continuation across at most maximum_looks looks.
+    """
+    if maximum_looks <= 0 or family_size <= 0:
+        raise ValueError("look and family counts must be positive")
+    if not isfinite(family_alpha) or not 0 < family_alpha < 1:
+        raise ValueError("family_alpha must be between zero and one")
+    per_test_two_sided = family_alpha / (maximum_looks * family_size)
+    return NormalDist().inv_cdf(1.0 - per_test_two_sided / 2.0)
+
+
+def adaptive_paired_difference(
+    left: Iterable[TrialObservation | Mapping[str, Any]],
+    right: Iterable[TrialObservation | Mapping[str, Any]],
+    *,
+    family_alpha: float,
+    maximum_looks: int,
+    family_size: int = 1,
+) -> PairedEstimate:
+    """Paired interval protected for repeated adaptive inspection."""
+    z = sequential_confidence_z(
+        family_alpha=family_alpha,
+        maximum_looks=maximum_looks,
+        family_size=family_size,
+    )
+    return paired_difference(left, right, confidence_z=z)
