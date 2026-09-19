@@ -348,38 +348,47 @@ class Phase3Pipeline:
         c0 = dict(deck.current_mana_base)
         streams: list[list[dict[str, Any]]] = []
         executed: list[dict[str, Any]] = []
-        for index, scenario in enumerate(self.config["robustness_scenarios"]):
+        trial_index = 0
+        for scenario in self.config["robustness_scenarios"]:
             play_draw = scenario["play_draw"]
-            on_play = False if play_draw == "all_draw" else True
-            summary, events = simulate_trial(
-                deck, c0, candidate_label="C0_ROBUSTNESS_FIXTURE",
-                scenario_label=scenario["id"], trial=index,
-                seed=int(self.config["randomness"]["validation_seed"]),
-                on_play=on_play, mulligan_policy=scenario["mulligan"],
-                sequencing_policy=scenario["sequencing"],
-                scry_policy_name=scenario["scry"],
-                information_policy_name=scenario["information"],
-                reserve_policy_name=scenario["reserve"],
-                planner_search_depth=int(self.config["scenarios"]["planner_search_depth"]),
-                planner_max_actions=int(self.config["scenarios"]["planner_max_actions_per_main"]),
+            play_draw_axes = (
+                (True, False) if play_draw == "weighted_50_50"
+                else (True,) if play_draw == "all_play"
+                else (False,)
             )
-            rows = validate_production_event_stream(events)
-            identity = rows[0]
-            for axis in ("mulligan", "sequencing", "scry", "information", "reserve"):
-                event_field = f"{axis}_policy"
-                if identity[event_field] != scenario[axis]:
-                    raise RuntimeError(f"robustness policy axis drift: {scenario['id']} / {axis}")
-            streams.append(events)
-            executed.append({
-                "scenario": scenario["id"],
-                "mulligan": scenario["mulligan"],
-                "sequencing": scenario["sequencing"],
-                "scry": scenario["scry"],
-                "information": scenario["information"],
-                "reserve": scenario["reserve"],
-                "play_draw": play_draw,
-                "observed_on_play": bool(summary["on_play"]),
-            })
+            for on_play in play_draw_axes:
+                summary, events = simulate_trial(
+                    deck, c0, candidate_label="C0_ROBUSTNESS_FIXTURE",
+                    scenario_label=scenario["id"], trial=trial_index,
+                    seed=int(self.config["randomness"]["validation_seed"]),
+                    on_play=on_play, mulligan_policy=scenario["mulligan"],
+                    sequencing_policy=scenario["sequencing"],
+                    scry_policy_name=scenario["scry"],
+                    information_policy_name=scenario["information"],
+                    reserve_policy_name=scenario["reserve"],
+                    planner_search_depth=int(self.config["scenarios"]["planner_search_depth"]),
+                    planner_max_actions=int(self.config["scenarios"]["planner_max_actions_per_main"]),
+                )
+                trial_index += 1
+                rows = validate_production_event_stream(events)
+                identity = rows[0]
+                for axis in ("mulligan", "sequencing", "scry", "information", "reserve"):
+                    event_field = f"{axis}_policy"
+                    if identity[event_field] != scenario[axis]:
+                        raise RuntimeError(
+                            f"robustness policy axis drift: {scenario['id']} / {axis}"
+                        )
+                streams.append(events)
+                executed.append({
+                    "scenario": scenario["id"],
+                    "mulligan": scenario["mulligan"],
+                    "sequencing": scenario["sequencing"],
+                    "scry": scenario["scry"],
+                    "information": scenario["information"],
+                    "reserve": scenario["reserve"],
+                    "play_draw": play_draw,
+                    "observed_on_play": bool(summary["on_play"]),
+                })
         trial_table = build_candidate_trial_table(streams)
         robustness = build_robustness_table(trial_table, metric="spell_castable")
         return self._carry("07_robustness", "06_fresh_validation", {
