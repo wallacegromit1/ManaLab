@@ -619,6 +619,7 @@ def enumerate_action_sequences(
     max_depth: int = 8,
     include_land_actions: bool = True,
     information_policy_name: str = BASELINE_INFORMATION_POLICY,
+    search_audit: dict[str, Any] | None = None,
 ) -> list[ActionSequenceResult]:
     """Enumerate causal visible-state sequences through unresolved chance nodes.
 
@@ -640,6 +641,21 @@ def enumerate_action_sequences(
     initial_event_count = len(state.events)
     results: list[ActionSequenceResult] = []
     visited: set[tuple] = set()
+    audit = search_audit if search_audit is not None else {}
+    audit.clear()
+    audit.update({
+        "configured_max_depth": int(max_depth),
+        "root_actions": 0,
+        "expanded_nodes": 0,
+        "branches_considered": 0,
+        "recorded_states": 0,
+        "terminal_nodes": 0,
+        "prunes_dedup": 0,
+        "prunes_illegal": 0,
+        "stopping_reasons": {"depth_limit": 0, "no_actions": 0, "dedup": 0},
+        "maximum_explored_depth": 0,
+        "maximum_sequence_length": 0,
+    })
 
     def record(
         current: GameState,
@@ -682,6 +698,8 @@ def enumerate_action_sequences(
             artifact_loss=len(initial_artifact_uids - current_artifact_uids),
         )
         results.append(ActionSequenceResult(copy.deepcopy(current), labels, option, actions))
+        audit["recorded_states"] += 1
+        audit["maximum_sequence_length"] = max(audit["maximum_sequence_length"], len(actions))
 
     def recurse(
         current: GameState,
@@ -699,16 +717,31 @@ def enumerate_action_sequences(
         root_path = tuple(str(action.key) for action in actions[:1])
         key = _visible_search_key(current, due, hard, spells, depth, root_path)
         if key in visited:
+            audit["prunes_dedup"] += 1
+            audit["stopping_reasons"]["dedup"] += 1
             return
         visited.add(key)
+        audit["expanded_nodes"] += 1
+        audit["maximum_explored_depth"] = max(audit["maximum_explored_depth"], depth)
         record(current, labels, actions, due, hard, spells, raw_spells)
         if depth >= max_depth:
+            audit["terminal_nodes"] += 1
+            audit["stopping_reasons"]["depth_limit"] += 1
             return
-        for action in generate_legal_actions(current, deck, include_land_actions=include_land_actions):
+        legal_actions = generate_legal_actions(current, deck, include_land_actions=include_land_actions)
+        if depth == 0:
+            audit["root_actions"] = len(legal_actions)
+        if not legal_actions:
+            audit["terminal_nodes"] += 1
+            audit["stopping_reasons"]["no_actions"] += 1
+            return
+        audit["branches_considered"] += len(legal_actions)
+        for action in legal_actions:
             branch = copy.deepcopy(current)
             try:
                 apply_planner_action(branch, deck, action, scry_policy_name=scry_policy_name, reveal_information=False)
             except ValueError:
+                audit["prunes_illegal"] += 1
                 continue
             next_labels = labels + (action.label,)
             next_actions = actions + (action,)
@@ -722,6 +755,8 @@ def enumerate_action_sequences(
                 next_spells, next_raw_spells, depth + 1,
             )
 
+    if max_depth <= 0:
+        raise ValueError("planner max_depth must be positive")
     recurse(copy.deepcopy(state), (), (), 0, 0, 0, 0, 0)
     return results
 
@@ -789,6 +824,8 @@ def execute_action_policy(
         record_timing_snapshot(state, deck, "after_relevant_action")
     state.log(
         "policy_action_sequence", policy=action_policy_name, reserve_policy=reserve_policy_name,
+        scry_policy=scry_policy_name, information_policy=information_policy_name,
+        planner_search_depth=search_depth, planner_max_actions=max_actions,
         selected=executed,
         causal_root_decisions=roots, replanned_after_information=True,
     )
