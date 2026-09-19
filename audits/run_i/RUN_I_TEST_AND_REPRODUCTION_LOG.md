@@ -12,12 +12,17 @@ head `95b1de1716aa1c658ed62274e02f6a9b55886c83`, passed:
 - candidate-neutral pipeline and identical clean-run scientific manifest;
 - Run E / Run G archive SHA-256 `sha256sum -c`.
 
-**Important**: after that green head, new raw-event persistence, stricter
-dependency/typed-stage checks and predicate tests were committed.
-Those new changes require a subsequent CI run before any updated count
-or scientific content-tree hash is claimed. Consult the draft PR's
-latest-head Actions status. This document is not a claim that every
-Run I authorization acceptance has passed.
+Subsequent fully completed GitHub Actions run
+[35448864701](https://github.com/wallacegromit1/ManaLab/actions/runs/35448864701),
+head `98b23a092126953225caf93681a711dad7b8fdd4`, passed **222/222**
+working-tree tests and a matching two-run candidate-neutral manifest.
+Its code-tree SHA-256 was
+`6bea28bdbf167171a5efed4e74d85e2a3b3c1a37333979e2c299518844d7f97d`.
+The newly added screening-ledger module, adversarial ledger fixtures and
+C0-neutral stage-03 integration were committed **after** that passing
+run. Consult the latest branch-head Actions result before claiming a
+new test count or code-tree hash. No real candidate-screening evidence
+has been produced or authorized.
 
 ## Reproduce frozen parent archives
 
